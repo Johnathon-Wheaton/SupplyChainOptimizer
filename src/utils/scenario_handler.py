@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, List
+from typing import Dict, list
 import logging
 
 class ScenarioHandler:
@@ -9,13 +9,13 @@ class ScenarioHandler:
         self.logger = logging.getLogger(__name__)
 
     def split_scenarios(self, input_data: Dict[str, pd.DataFrame], 
-                       scenarios: List[str]) -> Dict[str, pd.DataFrame]:
+                       scenarios: list[str]) -> Dict[str, pd.DataFrame]:
         """
         Splits data by scenarios and handles wildcard (*) scenarios.
         
         Args:
             input_data: Dictionary of input DataFrames
-            scenarios: List of scenario names
+            scenarios: list of scenario names
             
         Returns:
             Dictionary of processed DataFrames

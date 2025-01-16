@@ -1,3 +1,9 @@
+from typing import Dict, Any, List
+import pandas as pd
+import numpy as np
+import logging
+from dataclasses import dataclass
+
 class ResultVisualizer:
     """Creates visualizations of optimization results."""
     

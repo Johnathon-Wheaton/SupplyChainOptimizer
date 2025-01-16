@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, list
 import numpy as np
 import pandas as pd
 import logging
@@ -6,7 +6,7 @@ import logging
 class ParameterCalculator:
     """Calculates derived parameters from input data."""
     
-    def __init__(self, input_data: Dict[str, pd.DataFrame], sets: Dict[str, List]):
+    def __init__(self, input_data: Dict[str, pd.DataFrame], sets: Dict[str, list]):
         self.input_data = input_data
         self.sets = sets
         self.logger = logging.getLogger(__name__)

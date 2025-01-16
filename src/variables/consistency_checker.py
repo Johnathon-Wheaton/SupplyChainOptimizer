@@ -1,3 +1,8 @@
+from itertools import product
+from typing import Dict, Any
+import pulp
+import logging
+
 class ConsistencyChecker:
     """Checks consistency of optimization results."""
     
@@ -7,7 +12,7 @@ class ConsistencyChecker:
         self.logger = logging.getLogger(__name__)
         self.tolerance = 1e-6  # Numerical tolerance for comparisons
 
-    def check_solution_consistency(self) -> Tuple[bool, List[str]]:
+    def check_solution_consistency(self) -> Tuple[bool, list[str]]:
         """
         Performs comprehensive consistency checks on optimization results.
         
@@ -39,7 +44,7 @@ class ConsistencyChecker:
             self.logger.error(f"Error checking solution consistency: {str(e)}")
             raise
 
-    def _check_flow_conservation(self) -> List[str]:
+    def _check_flow_conservation(self) -> list[str]:
         """Checks flow conservation at each node."""
         violations = []
         
@@ -83,7 +88,7 @@ class ConsistencyChecker:
             
         return violations
 
-    def _check_capacity_constraints(self) -> List[str]:
+    def _check_capacity_constraints(self) -> list[str]:
         """Checks if capacity constraints are satisfied."""
         violations = []
         
@@ -119,7 +124,7 @@ class ConsistencyChecker:
             
         return violations
 
-    def _check_demand_satisfaction(self) -> List[str]:
+    def _check_demand_satisfaction(self) -> list[str]:
         """Checks if demand requirements are met."""
         violations = []
         
@@ -154,7 +159,7 @@ class ConsistencyChecker:
             
         return violations
 
-    def _check_cost_consistency(self) -> List[str]:
+    def _check_cost_consistency(self) -> list[str]:
         """Checks consistency of cost calculations."""
         violations = []
         

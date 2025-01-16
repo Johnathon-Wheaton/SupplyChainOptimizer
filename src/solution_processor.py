@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, Any
+from typing import Dict, Any, List
 import logging
 
 class SolutionProcessor:

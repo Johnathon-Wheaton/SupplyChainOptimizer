@@ -1,0 +1,44 @@
+2025-01-15 22:23:18,665 - __main__ - INFO - Starting optimization process with input file: C:\Users\john-\Documents\Python Scripts\NetworkOptimizer\examples\demo_inputs_small.xlsx
+2025-01-15 22:23:18,666 - __main__ - INFO - Loading input data...
+2025-01-15 22:23:20,232 - __main__ - INFO - Validating input data...
+2025-01-15 22:23:20,240 - __main__ - ERROR - Validation error: Missing required table: capacity_input
+2025-01-15 22:23:20,241 - __main__ - ERROR - Validation error: Missing required table: cost_input
+2025-01-15 22:23:20,241 - __main__ - ERROR - Validation error: Invalid period references in node_types_input: {'*'}
+2025-01-15 22:23:20,242 - __main__ - ERROR - Validation error: Invalid period references in flow_input: {'*'}
+2025-01-15 22:23:20,242 - __main__ - ERROR - Validation error: Invalid period references in fixed_operating_costs_input: {'*'}
+2025-01-15 22:23:20,242 - __main__ - ERROR - Validation error: Invalid period references in variable_operating_costs_input: {'*'}
+2025-01-15 22:23:20,243 - __main__ - ERROR - Validation error: Invalid period references in transportation_costs_input: {'*'}
+2025-01-15 22:23:20,243 - __main__ - ERROR - Validation error: Invalid period references in transportation_constraints_input: {'*'}
+2025-01-15 22:23:20,243 - __main__ - ERROR - Validation error: Invalid period references in load_capacity_input: {'*'}
+2025-01-15 22:23:20,244 - __main__ - ERROR - Validation error: Invalid period references in node_capacity_input: {'*'}
+2025-01-15 22:23:20,244 - __main__ - ERROR - Validation error: Invalid period references in carrying_or_missed_demand_cost_input: {'*'}
+2025-01-15 22:23:20,245 - __main__ - ERROR - Validation error: Invalid period references in carrying_or_missed_demand_constraints_input: {'*'}
+2025-01-15 22:23:20,245 - __main__ - ERROR - Validation error: Invalid period references in carrying_capacity_input: {'*'}
+2025-01-15 22:23:20,245 - __main__ - ERROR - Validation error: Invalid period references in product_capacity_consumption_input: {'*'}
+2025-01-15 22:23:20,246 - __main__ - ERROR - Validation error: Invalid period references in processing_expansions_input: {'*'}
+2025-01-15 22:23:20,246 - __main__ - ERROR - Validation error: Invalid period references in carrying_expansions_input: {'*'}
+2025-01-15 22:23:20,247 - __main__ - ERROR - Validation error: Invalid period references in max_transit_time_distance_input: {'*'}
+2025-01-15 22:23:20,247 - __main__ - ERROR - Validation error: Invalid period references in age_constraints_input: {'*'}
+2025-01-15 22:23:20,247 - __main__ - ERROR - Optimization failed: Input data validation failed
+2025-01-15 23:26:05,195 - __main__ - INFO - Starting optimization process with input file: C:\Users\john-\Documents\Python Scripts\NetworkOptimizer\examples\demo_inputs_small.xlsx
+2025-01-15 23:26:05,195 - __main__ - INFO - Loading input data...
+2025-01-15 23:26:07,046 - __main__ - INFO - Validating input data...
+2025-01-15 23:26:07,049 - __main__ - ERROR - Validation error: Missing required table: capacity_input
+2025-01-15 23:26:07,049 - __main__ - ERROR - Validation error: Missing required table: cost_input
+2025-01-15 23:26:07,050 - __main__ - ERROR - Validation error: Invalid period references in node_types_input: {'*'}
+2025-01-15 23:26:07,050 - __main__ - ERROR - Validation error: Invalid period references in flow_input: {'*'}
+2025-01-15 23:26:07,050 - __main__ - ERROR - Validation error: Invalid period references in fixed_operating_costs_input: {'*'}
+2025-01-15 23:26:07,051 - __main__ - ERROR - Validation error: Invalid period references in variable_operating_costs_input: {'*'}
+2025-01-15 23:26:07,051 - __main__ - ERROR - Validation error: Invalid period references in transportation_costs_input: {'*'}
+2025-01-15 23:26:07,052 - __main__ - ERROR - Validation error: Invalid period references in transportation_constraints_input: {'*'}
+2025-01-15 23:26:07,052 - __main__ - ERROR - Validation error: Invalid period references in load_capacity_input: {'*'}
+2025-01-15 23:26:07,052 - __main__ - ERROR - Validation error: Invalid period references in node_capacity_input: {'*'}
+2025-01-15 23:26:07,054 - __main__ - ERROR - Validation error: Invalid period references in carrying_or_missed_demand_cost_input: {'*'}
+2025-01-15 23:26:07,054 - __main__ - ERROR - Validation error: Invalid period references in carrying_or_missed_demand_constraints_input: {'*'}
+2025-01-15 23:26:07,054 - __main__ - ERROR - Validation error: Invalid period references in carrying_capacity_input: {'*'}
+2025-01-15 23:26:07,055 - __main__ - ERROR - Validation error: Invalid period references in product_capacity_consumption_input: {'*'}
+2025-01-15 23:26:07,055 - __main__ - ERROR - Validation error: Invalid period references in processing_expansions_input: {'*'}
+2025-01-15 23:26:07,056 - __main__ - ERROR - Validation error: Invalid period references in carrying_expansions_input: {'*'}
+2025-01-15 23:26:07,056 - __main__ - ERROR - Validation error: Invalid period references in max_transit_time_distance_input: {'*'}
+2025-01-15 23:26:07,056 - __main__ - ERROR - Validation error: Invalid period references in age_constraints_input: {'*'}
+2025-01-15 23:26:07,056 - __main__ - ERROR - Optimization failed: Input data validation failed
