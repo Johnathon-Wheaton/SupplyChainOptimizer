@@ -42,3 +42,7 @@
 2025-01-15 23:26:07,056 - __main__ - ERROR - Validation error: Invalid period references in max_transit_time_distance_input: {'*'}
 2025-01-15 23:26:07,056 - __main__ - ERROR - Validation error: Invalid period references in age_constraints_input: {'*'}
 2025-01-15 23:26:07,056 - __main__ - ERROR - Optimization failed: Input data validation failed
+2025-01-16 09:00:42,721 - __main__ - INFO - Starting optimization process with input file: C:\Users\3643306\OneDrive - Jabil\Documents\Python Scripts\NetworkOptimizer\examples\demo_inputs_small.xlsx
+2025-01-16 09:00:42,722 - __main__ - INFO - Loading input data...
+2025-01-16 09:00:43,919 - src.data_loader - ERROR - Error loading input data: Worksheet named 'Node Capacity' not found
+2025-01-16 09:00:43,935 - __main__ - ERROR - Optimization failed: Worksheet named 'Node Capacity' not found
