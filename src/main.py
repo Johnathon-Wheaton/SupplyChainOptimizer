@@ -125,6 +125,7 @@ def run_solver(input_values):
         nodes_input = filtered_dataframes['nodes_input']
         node_shut_down_launch_hard_constraints_input = filtered_dataframes['node_shut_down_launch_hard_constraints_input']
         node_types_input = filtered_dataframes['node_types_input']
+        filtered_dataframes['node_groups_input']['assigned']=1
         node_groups_input = filtered_dataframes['node_groups_input']
         flow_input = filtered_dataframes['flow_input']
         fixed_operating_costs_input = filtered_dataframes['fixed_operating_costs_input']
@@ -148,6 +149,7 @@ def run_solver(input_values):
         max_transit_time_distance_input = filtered_dataframes['max_transit_time_distance_input']
         carrying_or_missed_demand_constraints_input = filtered_dataframes['carrying_or_missed_demand_constraints_input']
         carrying_capacity_input = filtered_dataframes['carrying_capacity_input']
+        filtered_dataframes['product_transportation_groups_input']['value']=1
         product_transportation_groups_input = filtered_dataframes['product_transportation_groups_input']
         age_constraints_input = filtered_dataframes["age_constraints_input"]
         processing_assembly_constraints_input = filtered_dataframes['processing_assembly_constraints_input']
@@ -2610,6 +2612,8 @@ def optimize_network(file):
      return(results)
 
 if __name__ == "__main__":
-    file = "C:\\Users\\3643306\\OneDrive - Jabil\\Documents\\Python Scripts\\NetworkOptimizer\\examples\\demo_inputs_transportation_network_connectivity.xlsx"
-    results = optimize_network(file)
-    export_results(results,"C:\\Users\\3643306\\OneDrive - Jabil\\Documents\\Python Scripts\\NetworkOptimizer\\examples\\demo_inputs_transportation_network_connectivity_results.xlsx")
+    script_dir = os.path.dirname(__file__) 
+    input_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_network_connectivity.xlsx")
+    results = optimize_network(input_file_path)
+    output_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_network_connectivity.xlsx")
+    export_results(results,output_file_path)
