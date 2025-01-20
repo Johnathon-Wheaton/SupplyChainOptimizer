@@ -119,25 +119,9 @@ def run_solver(input_values):
             filtered_df = df[(df['Scenario'] == s) | (df['Scenario'] == "*")]
             filtered_dataframes[df_name] = filtered_df
 
+        # Assign filtered dataframes to variables for easier access
         scenarios_input = filtered_dataframes['scenarios_input']
         objectives_input = filtered_dataframes['objectives_input']
-        filtered_dataframes['node_groups_input']['assigned']=1
-        flow_input = filtered_dataframes['flow_input']
-        fixed_operating_costs_input = filtered_dataframes['fixed_operating_costs_input']
-        variable_operating_costs_input = filtered_dataframes['variable_operating_costs_input']
-        transportation_constraints_input = filtered_dataframes['transportation_constraints_input']
-        transportation_expansions_input = filtered_dataframes['transportation_expansions_input']
-        transportation_expansion_capacities_input = filtered_dataframes['transportation_expansion_capacities_input']
-        carrying_or_missed_demand_cost_input = filtered_dataframes['carrying_or_missed_demand_cost_input']
-        carrying_expansions_input = filtered_dataframes['carrying_expansions_input']
-        pop_demand_change_const_input = filtered_dataframes['pop_demand_change_const_input']
-        max_transit_time_distance_input = filtered_dataframes['max_transit_time_distance_input']
-        carrying_or_missed_demand_constraints_input = filtered_dataframes['carrying_or_missed_demand_constraints_input']
-        carrying_capacity_input = filtered_dataframes['carrying_capacity_input']
-        filtered_dataframes['product_transportation_groups_input']['value']=1
-        product_transportation_groups_input = filtered_dataframes['product_transportation_groups_input']
-        processing_assembly_constraints_input = filtered_dataframes['processing_assembly_constraints_input']
-        shipping_assembly_constraints_input = filtered_dataframes['shipping_assembly_constraints_input']
 
         # Create network model and get sets
         network = Network(filtered_dataframes)
@@ -175,7 +159,7 @@ def run_solver(input_values):
         filtered_dataframes['node_groups_input']['assigned'] = 1
         filtered_dataframes['node_groups_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['node_groups_input'], 'Group', NODEGROUPS)
         filtered_dataframes['node_groups_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['node_groups_input'], 'Node', NODES)
-
+        
         filtered_dataframes['node_shut_down_launch_hard_constraints_input'].loc[(filtered_dataframes['node_shut_down_launch_hard_constraints_input']['Launch'].isna()==False )&( filtered_dataframes['node_shut_down_launch_hard_constraints_input']['Launch']!=0),'Launch']=1
         filtered_dataframes['node_shut_down_launch_hard_constraints_input'].loc[(filtered_dataframes['node_shut_down_launch_hard_constraints_input']['Launch'].isna() )|( filtered_dataframes['node_shut_down_launch_hard_constraints_input']['Launch']==0),'Launch']=0
         filtered_dataframes['node_shut_down_launch_hard_constraints_input'].loc[(filtered_dataframes['node_shut_down_launch_hard_constraints_input']['Shutdown'].isna()==False )&( filtered_dataframes['node_shut_down_launch_hard_constraints_input']['Shutdown']!=0),'Shutdown']=1
@@ -199,7 +183,7 @@ def run_solver(input_values):
         filtered_dataframes['resource_capacity_consumption_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_capacity_consumption_input'], 'Node', NODES)
         filtered_dataframes['resource_capacity_consumption_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_capacity_consumption_input'], 'Node Group', NODEGROUPS)
         filtered_dataframes['resource_capacity_consumption_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_capacity_consumption_input'], 'Capacity Type', RESOURCE_CHILD_CAPACITY_TYPES)
-    
+        
         # Resource costs splits
         filtered_dataframes['resource_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_costs_input'], 'Period', PERIODS)
         filtered_dataframes['resource_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_costs_input'], 'Resource', RESOURCES)
@@ -212,18 +196,17 @@ def run_solver(input_values):
         filtered_dataframes['resource_capacities_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_capacities_input'], 'Node', NODES)
         filtered_dataframes['resource_capacities_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_capacities_input'], 'Node Group', NODEGROUPS)
         filtered_dataframes['resource_capacities_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_capacities_input'], 'Capacity Type', RESOURCE_CAPACITY_TYPES)
-
+        
         # Resource initial counts splits
         filtered_dataframes['resource_initial_counts_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_initial_counts_input'], 'Resource', RESOURCES)
         filtered_dataframes['resource_initial_counts_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_initial_counts_input'], 'Node', NODES)
         filtered_dataframes['resource_initial_counts_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_initial_counts_input'], 'Node Group', NODEGROUPS)
-        
+       
         #fill missing node_resource_constraints_input values with zeros
         filtered_dataframes['node_resource_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['node_resource_constraints_input'], 'Period', PERIODS)
         filtered_dataframes['node_resource_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['node_resource_constraints_input'], 'Resource', RESOURCES)
         filtered_dataframes['node_resource_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['node_resource_constraints_input'], 'Node', NODES)
         filtered_dataframes['node_resource_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['node_resource_constraints_input'], 'Node Group', NODEGROUPS)
-
         ####### To be removed ######
 
         # Splitting and filling node_types_input
@@ -250,14 +233,14 @@ def run_solver(input_values):
         # Filling missing values for transportation_costs_input
         # Transportation costs splits
         filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Period', PERIODS)
-        filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Origin', DEPARTING_NODES)
+        filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values( filtered_dataframes['transportation_costs_input'], 'Origin', DEPARTING_NODES)
         filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Origin Node Group', NODEGROUPS)
         filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Destination', RECEIVING_NODES)
         filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Destination Node Group', NODEGROUPS)
         filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Mode', MODES)
         filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Container', CONTAINERS)
         filtered_dataframes['transportation_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_costs_input'], 'Measure', MEASURES)
-        
+
         # Load capacity splits
         filtered_dataframes['load_capacity_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['load_capacity_input'], 'Period', PERIODS)
         filtered_dataframes['load_capacity_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['load_capacity_input'], 'Origin', DEPARTING_NODES)
@@ -279,110 +262,111 @@ def run_solver(input_values):
         filtered_dataframes['transportation_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_constraints_input'], 'Mode', MODES)
         filtered_dataframes['transportation_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_constraints_input'], 'Measure', MEASURES)
         filtered_dataframes['transportation_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_constraints_input'], 'Container', CONTAINERS)
-
+        
         # Transportation expansions splits
-        transportation_expansions_input = DataPreprocessor.split_asterisk_values(transportation_expansions_input, 'Period', NODES)
-        transportation_expansions_input = DataPreprocessor.split_asterisk_values(transportation_expansions_input, 'Origin', DEPARTING_NODES)
-        transportation_expansions_input = DataPreprocessor.split_asterisk_values(transportation_expansions_input, 'Origin Node Group', NODEGROUPS)
-        transportation_expansions_input = DataPreprocessor.split_asterisk_values(transportation_expansions_input, 'Destination', RECEIVING_NODES)
-        transportation_expansions_input = DataPreprocessor.split_asterisk_values(transportation_expansions_input, 'Destination Node Group', NODEGROUPS)
-        transportation_expansion_capacities_input = DataPreprocessor.split_asterisk_values(transportation_expansion_capacities_input, 'Mode', MODES)
-        transportation_expansion_capacities_input = DataPreprocessor.split_asterisk_values(transportation_expansion_capacities_input, 'Measure', MEASURES)
-        transportation_expansion_capacities_input = DataPreprocessor.split_asterisk_values(transportation_expansion_capacities_input, 'Container', CONTAINERS)
+        filtered_dataframes['transportation_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansions_input'], 'Period', PERIODS)
+        filtered_dataframes['transportation_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansions_input'], 'Origin', DEPARTING_NODES)
+        filtered_dataframes['transportation_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansions_input'], 'Origin Node Group', NODEGROUPS)
+        filtered_dataframes['transportation_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansions_input'], 'Destination', RECEIVING_NODES)
+        filtered_dataframes['transportation_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansions_input'], 'Destination Node Group', NODEGROUPS)
+        filtered_dataframes['transportation_expansion_capacities_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansion_capacities_input'], 'Mode', MODES)
+        filtered_dataframes['transportation_expansion_capacities_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansion_capacities_input'], 'Measure', MEASURES)
+        filtered_dataframes['transportation_expansion_capacities_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_expansion_capacities_input'], 'Container', CONTAINERS)
 
         # Carrying expansions splits
-        carrying_expansions_input = DataPreprocessor.split_asterisk_values(carrying_expansions_input, 'Location', NODES)
-        carrying_expansions_input = DataPreprocessor.split_asterisk_values(carrying_expansions_input, 'Node Group', NODEGROUPS)
-        carrying_expansions_input = DataPreprocessor.split_asterisk_values(carrying_expansions_input, 'Period', PERIODS)
-        carrying_expansions_input = DataPreprocessor.split_asterisk_values(carrying_expansions_input, 'Incremental Capacity Label', C_CAPACITY_EXPANSIONS)
-
+        filtered_dataframes['carrying_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_expansions_input'], 'Location', NODES)
+        filtered_dataframes['carrying_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_expansions_input'], 'Node Group', NODEGROUPS)
+        filtered_dataframes['carrying_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_expansions_input'], 'Period', PERIODS)
+        filtered_dataframes['carrying_expansions_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_expansions_input'], 'Incremental Capacity Label', C_CAPACITY_EXPANSIONS)
+        
         # PoP demand change splits
-        pop_demand_change_const_input = DataPreprocessor.split_asterisk_values(pop_demand_change_const_input, 'Origin', DEPARTING_NODES)
-        pop_demand_change_const_input = DataPreprocessor.split_asterisk_values(pop_demand_change_const_input, 'Origin Node Group', NODEGROUPS)
-        pop_demand_change_const_input = DataPreprocessor.split_asterisk_values(pop_demand_change_const_input, 'Product', PRODUCTS)
-        pop_demand_change_const_input = DataPreprocessor.split_asterisk_values(pop_demand_change_const_input, 'Period 1', PERIODS)
-        pop_demand_change_const_input = DataPreprocessor.split_asterisk_values(pop_demand_change_const_input, 'Period 2', PERIODS)
-        pop_demand_change_const_input = DataPreprocessor.split_asterisk_values(pop_demand_change_const_input, 'Destination', RECEIVING_NODES)
-        pop_demand_change_const_input = DataPreprocessor.split_asterisk_values(pop_demand_change_const_input, 'Destination Node Group', NODEGROUPS)
-
+        filtered_dataframes['pop_demand_change_const_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['pop_demand_change_const_input'], 'Origin', DEPARTING_NODES)
+        filtered_dataframes['pop_demand_change_const_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['pop_demand_change_const_input'], 'Origin Node Group', NODEGROUPS)
+        filtered_dataframes['pop_demand_change_const_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['pop_demand_change_const_input'], 'Product', PRODUCTS)
+        filtered_dataframes['pop_demand_change_const_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['pop_demand_change_const_input'], 'Period 1', PERIODS)
+        filtered_dataframes['pop_demand_change_const_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['pop_demand_change_const_input'], 'Period 2', PERIODS)
+        filtered_dataframes['pop_demand_change_const_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['pop_demand_change_const_input'], 'Destination', RECEIVING_NODES)
+        filtered_dataframes['pop_demand_change_const_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['pop_demand_change_const_input'], 'Destination Node Group', NODEGROUPS)
+    
         # Max transit time/distance splits
-        max_transit_time_distance_input = DataPreprocessor.split_asterisk_values(max_transit_time_distance_input, 'Origin', DEPARTING_NODES)
-        max_transit_time_distance_input = DataPreprocessor.split_asterisk_values(max_transit_time_distance_input, 'Origin Node Group', NODEGROUPS)
-        max_transit_time_distance_input = DataPreprocessor.split_asterisk_values(max_transit_time_distance_input, 'Destination', RECEIVING_NODES)
-        max_transit_time_distance_input = DataPreprocessor.split_asterisk_values(max_transit_time_distance_input, 'Destination Node Group', NODEGROUPS)
-        max_transit_time_distance_input = DataPreprocessor.split_asterisk_values(max_transit_time_distance_input, 'Period', PERIODS)
-        max_transit_time_distance_input = DataPreprocessor.split_asterisk_values(max_transit_time_distance_input, 'Mode', MODES)
+        filtered_dataframes['max_transit_time_distance_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['max_transit_time_distance_input'], 'Origin', DEPARTING_NODES)
+        filtered_dataframes['max_transit_time_distance_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['max_transit_time_distance_input'], 'Origin Node Group', NODEGROUPS)
+        filtered_dataframes['max_transit_time_distance_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['max_transit_time_distance_input'], 'Destination', RECEIVING_NODES)
+        filtered_dataframes['max_transit_time_distance_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['max_transit_time_distance_input'], 'Destination Node Group', NODEGROUPS)
+        filtered_dataframes['max_transit_time_distance_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['max_transit_time_distance_input'], 'Period', PERIODS)
+        filtered_dataframes['max_transit_time_distance_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['max_transit_time_distance_input'], 'Mode', MODES)
 
         # Carrying/missed demand cost splits
-        carrying_or_missed_demand_cost_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_cost_input, 'Period', PERIODS)
-        carrying_or_missed_demand_cost_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_cost_input, 'Product', PRODUCTS)
-        carrying_or_missed_demand_cost_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_cost_input, 'Node', NODES)
-        carrying_or_missed_demand_cost_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_cost_input, 'Node Group', NODEGROUPS)
+        filtered_dataframes['carrying_or_missed_demand_cost_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_cost_input'], 'Period', PERIODS)
+        filtered_dataframes['carrying_or_missed_demand_cost_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_cost_input'], 'Product', PRODUCTS)
+        filtered_dataframes['carrying_or_missed_demand_cost_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_cost_input'], 'Node', NODES)
+        filtered_dataframes['carrying_or_missed_demand_cost_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_cost_input'], 'Node Group', NODEGROUPS)
 
-        # Carrying/missed demand constraints splits
-        carrying_or_missed_demand_constraints_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_constraints_input, 'Period', PERIODS)
-        carrying_or_missed_demand_constraints_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_constraints_input, 'Product', PRODUCTS)
-        carrying_or_missed_demand_constraints_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_constraints_input, 'Node', NODES)
-        carrying_or_missed_demand_constraints_input = DataPreprocessor.split_asterisk_values(carrying_or_missed_demand_constraints_input, 'Node Group', NODEGROUPS)
+        # Carrying/missed demand constraints
+        filtered_dataframes['carrying_or_missed_demand_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_constraints_input'], 'Period', PERIODS)
+        filtered_dataframes['carrying_or_missed_demand_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_constraints_input'], 'Product', PRODUCTS)
+        filtered_dataframes['carrying_or_missed_demand_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_constraints_input'], 'Node', NODES)
+        filtered_dataframes['carrying_or_missed_demand_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_or_missed_demand_constraints_input'], 'Node Group', NODEGROUPS)
 
-        # Carrying capacity splits
-        carrying_capacity_input = DataPreprocessor.split_asterisk_values(carrying_capacity_input, 'Period', PERIODS)
-        carrying_capacity_input = DataPreprocessor.split_asterisk_values(carrying_capacity_input, 'Node', NODES)
-        carrying_capacity_input = DataPreprocessor.split_asterisk_values(carrying_capacity_input, 'Node Group', NODEGROUPS)
-        carrying_capacity_input = DataPreprocessor.split_asterisk_values(carrying_capacity_input, 'Measure', MEASURES)
+        # Carrying capacity
+        filtered_dataframes['carrying_capacity_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_capacity_input'], 'Period', PERIODS)
+        filtered_dataframes['carrying_capacity_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_capacity_input'], 'Node', NODES)
+        filtered_dataframes['carrying_capacity_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_capacity_input'], 'Node Group', NODEGROUPS)
+        filtered_dataframes['carrying_capacity_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['carrying_capacity_input'], 'Measure', MEASURES)
 
         # Fixed operating costs splits
-        fixed_operating_costs_input = DataPreprocessor.split_asterisk_values(fixed_operating_costs_input, 'Period', PERIODS)
-        fixed_operating_costs_input = DataPreprocessor.split_asterisk_values(fixed_operating_costs_input, 'Name', NODES)
-        fixed_operating_costs_input = DataPreprocessor.split_asterisk_values(fixed_operating_costs_input, 'Node Group', NODEGROUPS)
+        filtered_dataframes['fixed_operating_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['fixed_operating_costs_input'], 'Period', PERIODS)
+        filtered_dataframes['fixed_operating_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['fixed_operating_costs_input'], 'Name', NODES)
+        filtered_dataframes['fixed_operating_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['fixed_operating_costs_input'], 'Node Group', NODEGROUPS)
 
-        # Variable operating costs splits
-        variable_operating_costs_input = DataPreprocessor.split_asterisk_values(variable_operating_costs_input, 'Period', PERIODS)
-        variable_operating_costs_input = DataPreprocessor.split_asterisk_values(variable_operating_costs_input, 'Name', NODES)
-        variable_operating_costs_input = DataPreprocessor.split_asterisk_values(variable_operating_costs_input, 'Node Group', NODEGROUPS)
-        variable_operating_costs_input = DataPreprocessor.split_asterisk_values(variable_operating_costs_input, 'Product', PRODUCTS)
+        # Variable operating costs
+        filtered_dataframes['variable_operating_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['variable_operating_costs_input'], 'Period', PERIODS)
+        filtered_dataframes['variable_operating_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['variable_operating_costs_input'], 'Name', NODES)
+        filtered_dataframes['variable_operating_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['variable_operating_costs_input'], 'Node Group', NODEGROUPS)
+        filtered_dataframes['variable_operating_costs_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['variable_operating_costs_input'], 'Product', PRODUCTS)
 
         # Product transportation groups splits
-        product_transportation_groups_input = DataPreprocessor.split_asterisk_values(product_transportation_groups_input, 'Product', PRODUCTS)
+        filtered_dataframes['product_transportation_groups_input']['value'] = 1
+        filtered_dataframes['product_transportation_groups_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['product_transportation_groups_input'], 'Product', PRODUCTS)
 
         # Filling missing values for flow_input
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Period', PERIODS)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Node', DEPARTING_NODES)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Node Group', NODEGROUPS)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Downstream Node', RECEIVING_NODES)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Downstream Node Group', NODEGROUPS)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Product', PRODUCTS)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Mode', MODES)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Container', CONTAINERS)
-        flow_input = DataPreprocessor.split_asterisk_values(flow_input, 'Measure', MEASURES)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Period', PERIODS)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Node', DEPARTING_NODES)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Node Group', NODEGROUPS)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Downstream Node', RECEIVING_NODES)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Downstream Node Group', NODEGROUPS)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Product', PRODUCTS)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Mode', MODES)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Container', CONTAINERS)
+        filtered_dataframes['flow_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['flow_input'], 'Measure', MEASURES)
 
         # Processing assembly constraints splits
-        processing_assembly_constraints_input = DataPreprocessor.split_asterisk_values(processing_assembly_constraints_input, 'Period', PERIODS)
-        processing_assembly_constraints_input = DataPreprocessor.split_asterisk_values(processing_assembly_constraints_input, 'Product 1', PRODUCTS)
-        processing_assembly_constraints_input = DataPreprocessor.split_asterisk_values(processing_assembly_constraints_input, 'Product 2', PRODUCTS)
-        processing_assembly_constraints_input = DataPreprocessor.split_asterisk_values(processing_assembly_constraints_input, 'Node', NODES)
-        processing_assembly_constraints_input = DataPreprocessor.split_asterisk_values(processing_assembly_constraints_input, 'Node Group', NODEGROUPS)
+        filtered_dataframes['processing_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['processing_assembly_constraints_input'], 'Period', PERIODS)
+        filtered_dataframes['processing_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['processing_assembly_constraints_input'], 'Product 1', PRODUCTS)
+        filtered_dataframes['processing_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['processing_assembly_constraints_input'], 'Product 2', PRODUCTS)
+        filtered_dataframes['processing_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['processing_assembly_constraints_input'], 'Node', NODES)
+        filtered_dataframes['processing_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['processing_assembly_constraints_input'], 'Node Group', NODEGROUPS)
 
-        # Shipping assembly constraints splits
-        shipping_assembly_constraints_input = DataPreprocessor.split_asterisk_values(shipping_assembly_constraints_input, 'Period', PERIODS)
-        shipping_assembly_constraints_input = DataPreprocessor.split_asterisk_values(shipping_assembly_constraints_input, 'Product 1', PRODUCTS)
-        shipping_assembly_constraints_input = DataPreprocessor.split_asterisk_values(shipping_assembly_constraints_input, 'Product 2', PRODUCTS)
-        shipping_assembly_constraints_input = DataPreprocessor.split_asterisk_values(shipping_assembly_constraints_input, 'Origin', DEPARTING_NODES)
-        shipping_assembly_constraints_input = DataPreprocessor.split_asterisk_values(shipping_assembly_constraints_input, 'Destination', RECEIVING_NODES)
-        shipping_assembly_constraints_input = DataPreprocessor.split_asterisk_values(shipping_assembly_constraints_input, 'Origin Node Group', NODEGROUPS)
-        shipping_assembly_constraints_input = DataPreprocessor.split_asterisk_values(shipping_assembly_constraints_input, 'Destination Node Group', NODEGROUPS)
-
+        # Shipping assembly constraints
+        filtered_dataframes['shipping_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['shipping_assembly_constraints_input'], 'Period', PERIODS)
+        filtered_dataframes['shipping_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['shipping_assembly_constraints_input'], 'Product 1', PRODUCTS)
+        filtered_dataframes['shipping_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['shipping_assembly_constraints_input'], 'Product 2', PRODUCTS)
+        filtered_dataframes['shipping_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['shipping_assembly_constraints_input'], 'Origin', DEPARTING_NODES)
+        filtered_dataframes['shipping_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['shipping_assembly_constraints_input'], 'Destination', RECEIVING_NODES)
+        filtered_dataframes['shipping_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['shipping_assembly_constraints_input'], 'Origin Node Group', NODEGROUPS)
+        filtered_dataframes['shipping_assembly_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['shipping_assembly_constraints_input'], 'Destination Node Group', NODEGROUPS)
+    
         # Resource attributes splits
         filtered_dataframes['resource_attributes_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_attributes_input'], 'Resource Attribute', RESOURCE_ATTRIBUTES)
         filtered_dataframes['resource_attributes_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_attributes_input'], 'Period', PERIODS)
 
-        # Resource attribute constraints splits
+        # Resource attribute constraints
         filtered_dataframes['resource_attribute_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_attribute_constraints_input'], 'Node Group', NODEGROUPS)
         filtered_dataframes['resource_attribute_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_attribute_constraints_input'], 'Period', PERIODS)
         filtered_dataframes['resource_attribute_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_attribute_constraints_input'], 'Resource', RESOURCES)
         filtered_dataframes['resource_attribute_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_attribute_constraints_input'], 'Node', NODES)
         filtered_dataframes['resource_attribute_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['resource_attribute_constraints_input'], 'Resource Attribute', RESOURCE_ATTRIBUTES)
-    
+        
         # Create parameters
         parameter_processor = ParameterProcessor()
         list_of_parameters = parameter_processor.create_all_parameters(filtered_dataframes)
@@ -476,239 +460,7 @@ def run_solver(input_values):
         resource_max_to_add = list_of_parameters['resource_max_to_add']
 
 
-        # ind
-
-        # index_cols = ['Period', 'Product', 'Destination'ex_cols = ['Node', 'Group'] 
-        # node_in_nodegroup = node_groups_input.set_index(index_cols)['assigned'].to_dict()
-
-        # index_cols = ['Node', 'Group'] 
-        # node_in_nodegroup = node_groups_input.set_index(index_cols)['assigned'].to_dict()
-
-        # index_cols = ['Origin', 'Destination', 'Mode'] 
-        # distance = od_distances_and_transit_times_input.set_index(index_cols)['Distance'].to_dict()
-        # transit_time = od_distances_and_transit_times_input.set_index(index_cols)['Transit Time'].to_dict()
-        # transport_periods = od_distances_and_transit_times_input.set_index(index_cols)['Periods'].to_dict()
-
-        # index_cols = ['Period', 'Product', 'Destination']
-        # demand = demand_input.set_index(index_cols)['Demand'].to_dict()  , 'Age', 'Destination Node Group']
-        # max_vol_by_age = age_constraints_input.set_index(index_cols)['Max Volume'].to_dict()
-        # age_constraint_violation_cost = age_constraints_input.set_index(index_cols)['Cost per Unit to Violate'].to_dict()
-        
-        # index_cols = ['Node', 'Downstream Node', 'Product', 'Period', 'Mode', 
-        #             'Container', 'Measure', 'Node Group', 'Downstream Node Group' ]
-        # flow_constraints_min = flow_input.set_index(index_cols)['Min'].to_dict()
-        # flow_constraints_max = flow_input.set_index(index_cols)['Max'].to_dict()
-        # flow_constraints_min_pct_ob = flow_input.set_index(index_cols)['Min Pct of OB'].to_dict()
-        # flow_constraints_max_pct_ob = flow_input.set_index(index_cols)['Max Pct of OB'].to_dict()
-        # flow_constraints_min_pct_ib = flow_input.set_index(index_cols)['Min Pct of IB'].to_dict()
-        # flow_constraints_max_pct_ib = flow_input.set_index(index_cols)['Max Pct of IB'].to_dict()
-        # flow_constraints_min_connections = flow_input.set_index(index_cols)['Min Connections'].to_dict()
-        # flow_constraints_max_connections = flow_input.set_index(index_cols)['Max Connections'].to_dict()
-
-        # index_cols = ['Period', 'Node', 'Node Group', 'Product 1', 'Product 2']
-        # processing_assembly_p1_required = processing_assembly_constraints_input.set_index(index_cols)['Product 1 Qty'].to_dict()
-        # processing_assembly_p2_required = processing_assembly_constraints_input.set_index(index_cols)['Product 2 Qty'].to_dict()
-
-        # index_cols = ['Period', 'Origin', 'Destination', 'Origin Node Group', 'Destination Node Group', 'Product 1', 'Product 2']
-        # shipping_assembly_p1_required = shipping_assembly_constraints_input.set_index(index_cols)['Product 1 Qty'].to_dict()
-        # shipping_assembly_p2_required = shipping_assembly_constraints_input.set_index(index_cols)['Product 2 Qty'].to_dict()
-        
-        # index_cols = ['Origin', 'Destination', 'Mode', 'Container', 'Measure', 'Period','Origin Node Group','Destination Node Group']
-        # print(transportation_cost_fixed  == transportation_costs_input.set_index(index_cols)['Fixed Cost'].to_dict() )
-        # transportation_cost_fixed = transportation_costs_input.set_index(index_cols)['Fixed Cost'].to_dict() 
-        # transportation_cost_variable_distance = transportation_costs_input.set_index(index_cols)['Cost per Unit of Distance'].to_dict() 
-        # transportation_cost_variable_time = filtered_dataframes['transportation_costs_input'].set_index(['Origin', 'Destination', 'Mode', 'Container', 'Measure', 'Period','Origin Node Group', 'Destination Node Group'])['Cost per Unit of Time'].to_dict()
-        # print(transportation_cost_variable_time == transportation_costs_input.set_index(index_cols)['Cost per Unit of Time'].to_dict() )
-        # transportation_cost_variable_time = transportation_costs_input.set_index(index_cols)['Cost per Unit of Time'].to_dict() 
-        # transportation_cost_minimum = transportation_costs_input.set_index(index_cols)['Minimum Cost Regardless of Distance'].to_dict() 
-
-        # index_cols = ['Product', 'Measure']
-        # products_measures = products_input.set_index(index_cols)['Value'].to_dict()
-
-        # index_cols = ['Period', 'Name', 'Product', 'Node Group']
-        # operating_costs_variable = variable_operating_costs_input.set_index(index_cols)['Variable Cost'].to_dict()
-        # capacity_consumption_periods = variable_operating_costs_input.set_index(index_cols)['Periods of Capacity Consumption'].to_dict() 
-        # delay_periods = variable_operating_costs_input.set_index(index_cols)['Periods Delay'].to_dict()
-
-        # index_cols = ['Period', 'Origin', 'Destination', 'Mode', 'Measure', 'Origin Node Group', 'Destination Node Group']
-        # load_capacity = load_capacity_input.set_index(index_cols)['Capacity'].to_dict()
-        
-        # index_cols = ['Capacity Type', 'Parent Capacity Type']
-        # capacity_type_heirarchy = capacity_type_heirarchy_input.set_index(index_cols)['Relative Rate'].to_dict()
-
-        # index_cols = ['Period', 'Origin', 'Destination', 'Mode', 'Container', 'Measure', 'Origin Node Group', 'Destination Node Group']
-        # transportation_constraints_min = transportation_constraints_input.set_index(index_cols)['Min'].to_dict() 
-        # transportation_constraints_max = transportation_constraints_input.set_index(index_cols)['Max'].to_dict()
-        
-        # index_cols = ['Incremental Capacity Label', 'Mode', 'Container', 'Measure']
-        # transportation_expansion_capacity = transportation_expansion_capacities_input.set_index(index_cols)['Incremental Capacity'].to_dict() 
-
-        # index_cols = ['Period', 'Origin', 'Destination', 'Incremental Capacity Label']
-        # transportation_expansion_cost = transportation_expansions_input.set_index(index_cols)['Cost'].to_dict()
-        # transportation_expansion_persisting_cost = transportation_expansions_input.set_index(index_cols)['Persisting Cost'].to_dict() 
-        # transportation_expansion_min_count = transportation_expansions_input.set_index(index_cols)['Min'].to_dict() 
-        # transportation_expansion_max_count = transportation_expansions_input.set_index(index_cols)['Max'].to_dict()  
-        
-        # index_cols = ['Period', 'Location',  'Incremental Capacity Label']
-        # ib_carrying_expansion_capacity = carrying_expansions_input.set_index(index_cols)['Inbound Incremental Capacity'].to_dict()
-        # ob_carrying_expansion_capacity = carrying_expansions_input .set_index(index_cols)['Outbound Incremental Capacity'].to_dict()
-        # carrying_expansions = carrying_expansions_input.set_index(index_cols)['Cost'].to_dict()
-        # carrying_expansions_persisting_cost = carrying_expansions_input.set_index(index_cols)['Persisting Cost'].to_dict()
-
-        # index_cols = ['Period 1', 'Period 2', 'Product', 'Origin', 'Destination', 'Origin Node Group', 'Destination Node Group']
-        # pop_cost_per_move = pop_demand_change_const_input.set_index(index_cols)['Cost per Destination Move'].to_dict()
-        # pop_cost_per_volume_moved = pop_demand_change_const_input.set_index(index_cols)['Cost per Volume Move'].to_dict()
-        # pop_max_destinations_moved = pop_demand_change_const_input.set_index(index_cols)['Max Destinations Moved'].to_dict()
-
-        # index_cols = ['Origin', 'Period', 'Mode', 'Origin Node Group','Destination', 'Destination Node Group']
-        # max_distance = max_transit_time_distance_input.set_index(index_cols)['Max Distance'].to_dict()
-        # max_transit_time = max_transit_time_distance_input.set_index(index_cols)['Max Transit Time'].to_dict()
-
-        # index_cols = ['Period', 'Name', 'Node Group']
-        # operating_costs_fixed = fixed_operating_costs_input.set_index(index_cols)['Fixed Cost'].to_dict()
-        # launch_cost = fixed_operating_costs_input.set_index(index_cols)['Launch Cost'].to_dict()
-        # shut_down_cost = fixed_operating_costs_input.set_index(index_cols)['Shut Down Cost'].to_dict()
-
-        # index_cols = ['Name']
-        # min_launch_count = nodes_input.set_index(index_cols)['Min Launches'].to_dict()
-        # max_launch_count = nodes_input.set_index(index_cols)['Max Launches'].to_dict()
-        # min_operating_duration = nodes_input.set_index(index_cols)['Min Operating Duration'].to_dict()
-        # max_operating_duration = nodes_input.set_index(index_cols)['Max Operating Duration'].to_dict()
-        # min_shut_down_count = nodes_input.set_index(index_cols)['Min Shutdowns'].to_dict()
-        # max_shut_down_count = nodes_input.set_index(index_cols)['Max Launches'].to_dict()
-        # min_shut_down_duration = nodes_input.set_index(index_cols)['Min Shutdown Duration'].to_dict()
-        # max_shut_down_duration = nodes_input.set_index(index_cols)['Max Shutdown Duration'].to_dict()
-
-        # index_cols = ['Name','Period']
-        # launch_hard_constraint = node_shut_down_launch_hard_constraints_input.set_index(index_cols)['Launch'].to_dict()
-        # shut_down_hard_constraint = node_shut_down_launch_hard_constraints_input.set_index(index_cols)['Shutdown'].to_dict()
-        
-        # index_cols = ['Period', 'Product', 'Node', 'Node Group']
-        # ib_carrying_cost = carrying_or_missed_demand_cost_input.set_index(index_cols)['Inbound Carrying Cost'].to_dict() 
-        # ob_carrying_cost = carrying_or_missed_demand_cost_input.set_index(index_cols)['Outbound Carrying Cost'].to_dict()
-        # dropping_cost = carrying_or_missed_demand_cost_input.set_index(index_cols)['Drop Cost'].to_dict()
-
-        # index_cols = ['Period', 'Product', 'Node', 'Node Group']
-        # ib_max_carried = carrying_or_missed_demand_constraints_input.set_index(index_cols)['Max Inbound Carrying'].to_dict()
-        # ob_max_carried = carrying_or_missed_demand_constraints_input.set_index(index_cols)['Max Outbound Carrying'].to_dict()
-        # max_dropped = carrying_or_missed_demand_constraints_input.set_index(index_cols)['Max Dropped'].to_dict()
-
-        # index_cols = ['Period', 'Node', 'Measure', 'Node Group']
-        # ib_carrying_capacity = carrying_capacity_input.set_index(index_cols)['Inbound Capacity'].to_dict()
-        # ob_carrying_capacity = carrying_capacity_input.set_index(index_cols)['Outbound Capacity'].to_dict()
-
-        # index_cols = ['Period']
-        # period_weight = periods_input.set_index(index_cols)['Weight'].to_dict()
-
-        # index_cols = ['Product', 'Group']
-        # transportation_group = product_transportation_groups_input.set_index(index_cols)['value'].to_dict()
-
-        # index_cols = ['Period', 'Node Type']  
-        # node_types_min = node_types_input.set_index(index_cols)['Min Count'].to_dict()
-        # node_types_max = node_types_input.set_index(index_cols)['Max Count'].to_dict()
-
-        # index_cols = ['Name', 'Node Type']
-        # node_type = node_type_input.set_index(index_cols)['value'].to_dict()
-
-        # index_cols = ['Period', 'Node', 'Resource', 'Node Group']
-        # resource_fixed_add_cost = resource_costs_input.set_index(index_cols)['Fixed Cost to Add Resource'].to_dict()
-        # resource_cost_per_time = resource_costs_input.set_index(index_cols)['Resource Cost per Time Unit'].to_dict()
-        # resource_fixed_remove_cost = resource_costs_input.set_index(index_cols)['Fixed Cost to Remove Resource'].to_dict()
-        # resource_add_cohort_count = resource_costs_input.set_index(index_cols)['Add Resources in Units of'].to_dict() #default to 1
-        # resource_remove_cohort_count = resource_costs_input.set_index(index_cols)['Remove Resources in Units of'].to_dict()
-        
-        # index_cols = ['Period', 'Node', 'Resource', 'Capacity Type', 'Node Group']
-        # resource_capacity_by_type = resource_capacities_input.set_index(index_cols)['Capacity per Resource'].to_dict()
-
-        # index_cols = ['Period', 'Node', 'Resource', 'Node Group']
-        # resource_node_min_count = node_resource_constraints_input.set_index(index_cols)['Min Count'].to_dict()
-        # resource_node_max_count = node_resource_constraints_input.set_index(index_cols)['Max Count'].to_dict()
-        # resource_min_to_add =  node_resource_constraints_input.set_index(index_cols)['Minimum Resources to Add'].to_dict()
-        # resource_max_to_add =  node_resource_constraints_input.set_index(index_cols)['Maximum Resources to Add'].to_dict()
-        # resource_min_to_remove =  node_resource_constraints_input.set_index(index_cols)['Minimum Resources to Remove'].to_dict()
-        # resource_max_to_remove = node_resource_constraints_input.set_index(index_cols)['Maximum Resources to Remove'].to_dict()
-
-        # index_cols = ['Period', 'Node', 'Resource', 'Node Group', 'Resource Attribute']
-        # resource_attribute_min = resource_attribute_constraints_input.set_index(index_cols)['Min'].to_dict()
-        # resource_attribute_max = resource_attribute_constraints_input.set_index(index_cols)['Max'].to_dict()
-
-        # index_cols = ['Period', 'Resource',  'Resource Attribute']
-        # resource_attribute_consumption_per = resource_attributes_input.set_index(index_cols)['Value per Resource'].to_dict()
-
-        # index_cols = ['Node', 'Resource', 'Node Group']
-        # resource_node_initial_count = resource_initial_counts_input.set_index(index_cols)['Initial Count'].to_dict()
-
-        # index_cols = ['Product',	'Period',  'Node Group',	'Node',	'Capacity Type']
-        # resource_capacity_consumption = resource_capacity_consumption_input.set_index(index_cols)['Capacity Required per Unit'].to_dict()
-        # resource_capacity_consumption_periods = resource_capacity_consumption_input.set_index(index_cols)['Periods of Capacity Consumption'].to_dict()
-
-        # list_of_parameters = {
-        #     "distance": distance,
-        #     "transit_time": transit_time,
-        #     "demand": demand,
-        #     "transportation_cost_fixed": transportation_cost_fixed,
-        #     "transportation_cost_variable_distance": transportation_cost_variable_distance,
-        #     "transportation_cost_variable_time": transportation_cost_variable_time,
-        #     "transportation_cost_minimum": transportation_cost_minimum,
-        #     "products_measures": products_measures,
-        #     "operating_costs_variable": operating_costs_variable,
-        #     "operating_costs_fixed": operating_costs_fixed,
-        #     "flow_constraints_min":flow_constraints_min,
-        #     "flow_constraints_max":flow_constraints_max,
-        #     "flow_constraints_min_pct_ob":flow_constraints_min_pct_ob,
-        #     "flow_constraints_max_pct_ob":flow_constraints_max_pct_ob,
-        #     "flow_constraints_min_pct_ib":flow_constraints_min_pct_ib,
-        #     "flow_constraints_max_pct_ib":flow_constraints_max_pct_ib,
-        #     "launch_cost": launch_cost,
-        #     "shut_down_cost": shut_down_cost,
-        #     "load_capacity": load_capacity,
-        #     "capacity_type_heirarchy": capacity_type_heirarchy,
-        #     "transportation_constraints_min": transportation_constraints_min,
-        #     "transportation_constraints_max": transportation_constraints_max,
-        #     "transportation_expansion_capacity": transportation_expansion_capacity,
-        #     "transportation_expansion_cost": transportation_expansion_cost,
-        #     "transportation_expansion_persisting_cost": transportation_expansion_persisting_cost,
-        #     "ib_carrying_expansion_capacity": ib_carrying_expansion_capacity,
-        #     "ob_carrying_expansion_capacity": ob_carrying_expansion_capacity,
-        #     "carrying_expansions": carrying_expansions,
-        #     "carrying_expansions_persisting_cost": carrying_expansions_persisting_cost,
-        #     "pop_cost_per_move": pop_cost_per_move,
-        #     "pop_cost_per_volume_moved": pop_cost_per_volume_moved,
-        #     "pop_max_destinations_moved": pop_max_destinations_moved,
-        #     "max_distance": max_distance,
-        #     "max_transit_time": max_transit_time,
-        #     "ib_carrying_cost": ib_carrying_cost,
-        #     "ob_carrying_cost": ob_carrying_cost,
-        #     "dropping_cost": dropping_cost,
-        #     "ib_max_carried": ib_max_carried,
-        #     "ob_max_carried": ob_max_carried,
-        #     "max_dropped": max_dropped,
-        #     "ib_carrying_capacity": ib_carrying_capacity,
-        #     "ob_carrying_capacity":ob_carrying_capacity,
-        #     "transportation_group": transportation_group,
-        #     "node_types_min":node_types_min,
-        #     "node_types_max":node_types_max,
-        #     "node_type":node_type,
-        #     "resource_fixed_add_cost": resource_fixed_add_cost,
-        #     "resource_cost_per_time": resource_cost_per_time,
-        #     "resource_fixed_remove_cost": resource_fixed_remove_cost,
-        #     "resource_add_cohort_count": resource_add_cohort_count,
-        #     "resource_remove_cohort_count": resource_remove_cohort_count,
-        #     "resource_min_to_add": resource_min_to_add,
-        #     "resource_max_to_add": resource_max_to_add,
-        #     "resource_min_to_remove": resource_min_to_remove,
-        #     "resource_max_to_remove": resource_max_to_remove,
-        #     "resource_capacity_by_type": resource_capacity_by_type,
-        #     "resource_node_min_count": resource_node_min_count,
-        #     "resource_node_max_count": resource_node_max_count,
-        #     "resource_node_initial_count": resource_node_initial_count,
-        #     "resource_capacity_consumption_periods":resource_capacity_consumption_periods,
-        #     "resource_capacity_consumption":resource_capacity_consumption,
-        #     "capacity_consumption_periods":capacity_consumption_periods,
-        #     "resource_attribute_min":resource_attribute_min,
-        #     "resource_attribute_max":resource_attribute_max,
-        #     "resource_attribute_consumption_per":resource_attribute_consumption_per,
-        # }
+       
         logging.info(f"Done formatting inputs. {round((datetime.now() - format_inputs_start).seconds, 0)} seconds.")
         compile_model_start = datetime.now()
 
