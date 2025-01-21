@@ -1,4 +1,4 @@
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 import pulp
 from itertools import product
 
@@ -60,6 +60,69 @@ class VariableCreator:
             lowBound=0,
             cat=pulp.LpContinuous
         )
+
+        variables['ib_carried_over_demand'] = pulp.LpVariable.dicts("ib_carried_over_demand",
+                                                    ((n_r, p, t) for n_r, p, t in product(self.network_sets['RECEIVING_NODES'], self.network_sets['PRODUCTS'], self.network_sets['PERIODS'])),
+                                                    lowBound=0,
+                                                    cat=pulp.LpContinuous)
+        
+        variables['ob_carried_over_demand'] = pulp.LpVariable.dicts("ob_carried_over_demand",
+                                                    ((n_d, p, t) for n_d, p, t in product(self.network_sets['DEPARTING_NODES'], self.network_sets['PRODUCTS'], self.network_sets['PERIODS'])),
+                                                    lowBound=0,
+                                                    cat=pulp.LpContinuous)
+
+        variables['dropped_demand'] = pulp.LpVariable.dicts("dropped_demand",
+                                            ((n, p, t) for n, p, t in product(self.network_sets['NODES'],self.network_sets['PRODUCTS'], self.network_sets['PERIODS'])),
+                                            lowBound=0,
+                                            cat=pulp.LpContinuous)
+
+        return variables
+    
+    def create_transportation_capacity_variables(self) -> Dict[str, Any]:
+        """Create variables related to flow in the network"""
+        variables = {}
+
+        variables['t_capacity_option_cost'] = pulp.LpVariable.dicts('t_capacity_option_cost', 
+                                                    ((t, o,d, e) for t, o,d, e in product(self.network_sets['PERIODS'], self.network_sets['DEPARTING_NODES'],self.network_sets['RECEIVING_NODES'], self.network_sets['T_CAPACITY_EXPANSIONS'])),
+                                                    lowBound=0, cat='Continuous')
+        variables['t_capacity_option_cost_by_location_type'] = pulp.LpVariable.dicts('t_capacity_option_cost_by_location_type', 
+                                                                    ((o,d, e) for o,d, e in product(self.network_sets['DEPARTING_NODES'],self.network_sets['RECEIVING_NODES'], self.network_sets['T_CAPACITY_EXPANSIONS'])),
+                                                                    lowBound=0, cat='Continuous')
+        variables['t_capacity_option_cost_by_period_type'] = pulp.LpVariable.dicts('t_capacity_option_cost_by_period_type', 
+                                                                    ((e, t) for e, t in product(self.network_sets['T_CAPACITY_EXPANSIONS'], self.network_sets['PERIODS'])),
+                                                                    lowBound=0, cat='Continuous')
+        variables['t_capacity_option_cost_by_location'] = pulp.LpVariable.dicts('t_capacity_option_cost_by_location', 
+                                                                    ((o,d) for o,d in product(self.network_sets['DEPARTING_NODES'],self.network_sets['RECEIVING_NODES'])),
+                                                                    lowBound=0, cat='Continuous')
+        variables['t_capacity_option_cost_by_period'] = pulp.LpVariable.dicts('t_capacity_option_cost_by_period', 
+                                                                self.network_sets['PERIODS'], lowBound=0, cat='Continuous')
+        variables['t_capacity_option_cost_by_type'] = pulp.LpVariable.dicts('t_capacity_option_cost_by_type', 
+                                                            self.network_sets['T_CAPACITY_EXPANSIONS'], lowBound=0, cat='Continuous')
+        variables['grand_total_t_capacity_option'] = pulp.LpVariable('grand_total_t_capacity_option', lowBound=0, cat='Continuous')
+
+        return variables
+
+    def create_carrying_capacity_variables(self) -> Dict[str, Any]:
+        """Create variables related to flow in the network"""
+        variables = {}
+
+        variables['c_capacity_option_cost'] = pulp.LpVariable.dicts('c_capacity_option_cost', 
+                                                    ((t, n, e) for t, n, e in product(self.network_sets['PERIODS'], self.network_sets['NODES'], self.network_sets['C_CAPACITY_EXPANSIONS'])),
+                                                    lowBound=0, cat='Continuous')
+        variables['c_capacity_option_cost_by_location_type'] = pulp.LpVariable.dicts('c_capacity_option_cost_by_location_type', 
+                                                                    ((n, e) for n, e in product(self.network_sets['NODES'], self.network_sets['C_CAPACITY_EXPANSIONS'])),
+                                                                    lowBound=0, cat='Continuous')
+        variables['c_capacity_option_cost_by_period_type'] = pulp.LpVariable.dicts('c_capacity_option_cost_by_period_type', 
+                                                                    ((e, t) for e, t in product(self.network_sets['C_CAPACITY_EXPANSIONS'], self.network_sets['PERIODS'])),
+                                                                    lowBound=0, cat='Continuous')
+        variables['c_capacity_option_cost_by_location'] = pulp.LpVariable.dicts('c_capacity_option_cost_by_location', 
+                                                                    self.network_sets['NODES'],
+                                                                    lowBound=0, cat='Continuous')
+        variables['c_capacity_option_cost_by_period'] = pulp.LpVariable.dicts('c_capacity_option_cost_by_period', 
+                                                                self.network_sets['PERIODS'], lowBound=0, cat='Continuous')
+        variables['c_capacity_option_cost_by_type'] = pulp.LpVariable.dicts('c_capacity_option_cost_by_type', 
+                                                            self.network_sets['C_CAPACITY_EXPANSIONS'], lowBound=0, cat='Continuous')
+        variables['grand_total_c_capacity_option'] = pulp.LpVariable('grand_total_c_capacity_option', lowBound=0, cat='Continuous')
 
         return variables
 
@@ -596,7 +659,7 @@ class VariableCreator:
 
         return variables
 
-    def create_carrying_capacity_variables(self) -> Dict[str, Any]:
+    def create_carrying_cost_variables(self) -> Dict[str, Any]:
         """Create variables related to carrying capacity"""
         variables = {}
         
@@ -709,6 +772,9 @@ class VariableCreator:
             'departed_product': ['DEPARTING_NODES', 'RECEIVING_NODES', 'PRODUCTS', 'PERIODS'],
             'processed_product': ['NODES', 'PRODUCTS', 'PERIODS'],
             'arrived_product': ['RECEIVING_NODES', 'PRODUCTS', 'PERIODS'],
+            'ib_carried_over_demand': ['RECEIVING_NODES', 'PRODUCTS', 'PERIODS'],
+            'ob_carried_over_demand': ['DEPARTING_NODES', 'PRODUCTS', 'PERIODS'],
+            'dropped_demand': ['NODES', 'PRODUCTS', 'PERIODS'],
 
             # Capacity variables
             'use_carrying_capacity_option': ['NODES', 'C_CAPACITY_EXPANSIONS', 'PERIODS'],
@@ -736,6 +802,24 @@ class VariableCreator:
             'operating_costs_by_origin': ['NODES'],
             'total_operating_costs': ['PERIODS'],
             'grand_total_operating_costs': [],
+
+            # transportation capacity variables
+            't_capacity_option_cost' :['PERIODS','DEPARTING_NODES','RECEIVING_NODES','T_CAPACITY_EXPANSIONS'],
+            't_capacity_option_cost_by_location_type' : ['DEPARTING_NODES','RECEIVING_NODES','T_CAPACITY_EXPANSIONS'],
+            't_capacity_option_cost_by_period_type' :['T_CAPACITY_EXPANSIONS','PERIODS'],
+            't_capacity_option_cost_by_location' :['DEPARTING_NODES','RECEIVING_NODES'],
+            't_capacity_option_cost_by_period' :['PERIODS'],
+            't_capacity_option_cost_by_type' : ['T_CAPACITY_EXPANSIONS'],
+            'grand_total_t_capacity_option' : [],
+
+            # carrying capacity variables
+            'c_capacity_option_cost' :['PERIODS','NODES','C_CAPACITY_EXPANSIONS'],
+            'c_capacity_option_cost_by_location_type' : ['NODES','C_CAPACITY_EXPANSIONS'],
+            'c_capacity_option_cost_by_period_type' :['C_CAPACITY_EXPANSIONS','PERIODS'],
+            'c_capacity_option_cost_by_location' :['NODES'],
+            'c_capacity_option_cost_by_period' :['PERIODS'],
+            'c_capacity_option_cost_by_type' : ['C_CAPACITY_EXPANSIONS'],
+            'grand_total_c_capacity_option' : [],
 
             # Resource variables
             'resources_assigned': ['RESOURCES', 'NODES', 'PERIODS'],
@@ -828,7 +912,7 @@ class VariableCreator:
         
         return dimensions
 
-     def create_all_variables(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def create_all_variables(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """Create all optimization variables
         
         Returns:
@@ -849,7 +933,9 @@ class VariableCreator:
         variables.update(self.create_age_variables())
         variables.update(self.create_node_operation_variables())
         variables.update(self.create_pop_variables())
-        variables.update(self.create_carrying_capacity_variables())
+        variables.update(self.create_carrying_cost_variables())
         variables.update(self.create_metric_variables())
+        variables.update(self.create_transportation_capacity_variables())
+        variables.update(self.create_carrying_capacity_variables())
 
         return variables, dimensions

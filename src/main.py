@@ -467,65 +467,128 @@ def run_solver(input_values):
 
         model = pulp.LpProblem(name="My_Model", sense=pulp.LpMinimize)
 
+        # Create variables
+        variable_creator = VariableCreator(list_of_sets)
+        variables, dimensions = variable_creator.create_all_variables()
 
-        # Add variables
-        departed_product_by_mode = pulp.LpVariable.dicts("departed_product_by_mode",
-                                                        ((n_d, n_r, p, t, m) for n_d, n_r, p, t, m in product(DEPARTING_NODES, RECEIVING_NODES, PRODUCTS, PERIODS, MODES)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpInteger)
+        # Extract individual variables for existing constraint definitions
+        departed_product_by_mode = variables['departed_product_by_mode']
+        departed_product = variables['departed_product']
+        processed_product = variables['processed_product']
+        arrived_product = variables['arrived_product']
+        use_carrying_capacity_option = variables['use_carrying_capacity_option']
+        use_transportation_capacity_option = variables['use_transportation_capacity_option']
+        arrived_and_completed_product = variables['arrived_and_completed_product']
+        total_arrived_and_completed_product = variables['total_arrived_and_completed_product']
+        resources_assigned = variables['resources_assigned']
+        resources_added = variables['resources_added']
+        resources_removed = variables['resources_removed']
+        resource_capacity = variables['resource_capacity']
+        resource_attribute_consumption = variables['resource_attribute_consumption']
+        ib_carried_over_demand = variables['ib_carried_over_demand']
+        ob_carried_over_demand = variables['ob_carried_over_demand']
+        dropped_demand = variables['dropped_demand']
+        resources_added_binary = variables['resources_added_binary']
+        resources_removed_binary = variables['resources_removed_binary']
+        resource_cohorts_added = variables['resource_cohorts_added']
+        resource_cohorts_removed = variables['resource_cohorts_removed']
+        resource_add_cost = variables['resource_add_cost']
+        resource_remove_cost = variables['resource_remove_cost']
+        resource_time_cost = variables['resource_time_cost']
+        resource_grand_total_cost = variables['resource_grand_total_cost']
+        variable_transportation_costs = variables['variable_transportation_costs']
+        fixed_transportation_costs = variables['fixed_transportation_costs']
+        transportation_costs = variables['transportation_costs']
+        od_transportation_costs = variables['od_transportation_costs']
+        mode_transportation_costs = variables['mode_transportation_costs']
+        total_od_transportation_costs = variables['total_od_transportation_costs']
+        total_mode_transportation_costs = variables['total_mode_transportation_costs']
+        total_time_transportation_costs = variables['total_time_transportation_costs']
+        grand_total_transportation_costs = variables['grand_total_transportation_costs']
+        num_loads_by_group = variables['num_loads_by_group']
+        num_loads = variables['num_loads']
+        od_num_loads = variables['od_num_loads']
+        mode_num_loads = variables['mode_num_loads']
+        total_od_num_loads = variables['total_od_num_loads']
+        total_mode_num_loads = variables['total_mode_num_loads']
+        total_num_loads = variables['total_num_loads']
+        grand_total_num_loads = variables['grand_total_num_loads']
+        departed_measures = variables['departed_measures']
+        vol_arrived_by_age = variables['vol_arrived_by_age']
+        ib_vol_carried_over_by_age = variables['ib_vol_carried_over_by_age']
+        ob_vol_carried_over_by_age = variables['ob_vol_carried_over_by_age']
+        vol_processed_by_age = variables['vol_processed_by_age']
+        vol_departed_by_age = variables['vol_departed_by_age']
+        vol_dropped_by_age = variables['vol_dropped_by_age']
+        demand_by_age = variables['demand_by_age']
+        age_violation_cost = variables['age_violation_cost']
+        grand_total_age_violation_cost = variables['grand_total_age_violation_cost']
+        is_launched = variables['is_launched']
+        is_shut_down = variables['is_shut_down']
+        is_site_operating = variables['is_site_operating']
+        total_launch_cost = variables['total_launch_cost']
+        launch_costs_by_period = variables['launch_costs_by_period']
+        grand_total_launch_cost = variables['grand_total_launch_cost']
+        total_shut_down_cost = variables['total_shut_down_cost']
+        shut_down_costs_by_period = variables['shut_down_costs_by_period']
+        grand_total_shut_down_cost = variables['grand_total_shut_down_cost']
+        pop_cost = variables['pop_cost']
+        volume_moved = variables['volume_moved']
+        num_destinations_moved = variables['num_destinations_moved']
+        total_volume_moved = variables['total_volume_moved']
+        total_num_destinations_moved = variables['total_num_destinations_moved']
+        grand_total_pop_cost = variables['grand_total_pop_cost']
+        binary_product_destination_assignment = variables['binary_product_destination_assignment']
+        is_destination_assigned_to_origin = variables['is_destination_assigned_to_origin']
+        dropped_volume_cost = variables['dropped_volume_cost']
+        ib_carried_volume_cost = variables['ib_carried_volume_cost']
+        ob_carried_volume_cost = variables['ob_carried_volume_cost']
+        dropped_volume_cost_by_period = variables['dropped_volume_cost_by_period']
+        ib_carried_volume_cost_by_period = variables['ib_carried_volume_cost_by_period']
+        ob_carried_volume_cost_by_period = variables['ob_carried_volume_cost_by_period']
+        dropped_volume_cost_by_product = variables['dropped_volume_cost_by_product']
+        ib_carried_volume_cost_by_product = variables['ib_carried_volume_cost_by_product']
+        ob_carried_volume_cost_by_product = variables['ob_carried_volume_cost_by_product']
+        dropped_volume_cost_by_node = variables['dropped_volume_cost_by_node']
+        ib_carried_volume_cost_by_node = variables['ib_carried_volume_cost_by_node']
+        ob_carried_volume_cost_by_node = variables['ob_carried_volume_cost_by_node']
+        ib_carried_volume_cost_by_node_time = variables['ib_carried_volume_cost_by_node_time']
+        ob_carried_volume_cost_by_node_time = variables['ob_carried_volume_cost_by_node_time']
+        dropped_volume_cost_by_product_time = variables['dropped_volume_cost_by_product_time']
+        ib_carried_volume_cost_by_product_time = variables['ib_carried_volume_cost_by_product_time']
+        ob_carried_volume_cost_by_product_time = variables['ob_carried_volume_cost_by_product_time']
+        total_dropped_volume_cost = variables['total_dropped_volume_cost']
+        total_ib_carried_volume_cost = variables['total_ib_carried_volume_cost']
+        total_ob_carried_volume_cost = variables['total_ob_carried_volume_cost']
+        grand_total_carried_and_dropped_volume_cost = variables['grand_total_carried_and_dropped_volume_cost']
+        max_transit_distance = variables['max_transit_distance']
+        max_capacity_utilization = variables['max_capacity_utilization']
+        node_utilization = variables['node_utilization']
+        variable_operating_costs = variables['variable_operating_costs']
+        fixed_operating_costs = variables['fixed_operating_costs']
+        operating_costs = variables['operating_costs']
+        operating_costs_by_origin = variables['operating_costs_by_origin']
+        total_operating_costs = variables['total_operating_costs']
+        grand_total_operating_costs = variables['grand_total_operating_costs']
+        
+        t_capacity_option_cost = variables['t_capacity_option_cost']
+        t_capacity_option_cost_by_location_type = variables['t_capacity_option_cost_by_location_type']
+        t_capacity_option_cost_by_period_type = variables['t_capacity_option_cost_by_period_type']
+        t_capacity_option_cost_by_location = variables['t_capacity_option_cost_by_location']
+        t_capacity_option_cost_by_period = variables['t_capacity_option_cost_by_period']
+        t_capacity_option_cost_by_type = variables['t_capacity_option_cost_by_type']
+        grand_total_t_capacity_option = variables['grand_total_t_capacity_option']
+        c_capacity_option_cost = variables['c_capacity_option_cost']
+        c_capacity_option_cost_by_location_type = variables['c_capacity_option_cost_by_location_type']
+        c_capacity_option_cost_by_period_type = variables['c_capacity_option_cost_by_period_type']
+        c_capacity_option_cost_by_location = variables['c_capacity_option_cost_by_location']
+        c_capacity_option_cost_by_period = variables['c_capacity_option_cost_by_period']
+        c_capacity_option_cost_by_type = variables['c_capacity_option_cost_by_type']
+        grand_total_c_capacity_option = variables['grand_total_c_capacity_option']
+        max_age = variables['max_age']
+        is_age_received = variables['is_age_received']
 
-        departed_product = pulp.LpVariable.dicts("departed_product",
-                                                    ((n_d, n_r, p, t) for n_d, n_r, p, t in product(DEPARTING_NODES, RECEIVING_NODES, PRODUCTS, PERIODS)),
-                                                    lowBound=0,
-                                                    cat=pulp.LpInteger)
-        
-        processed_product = pulp.LpVariable.dicts("processed_product",
-                                                    ((n, p, t) for n, p, t in product(NODES, PRODUCTS, PERIODS)),
-                                                    lowBound=0,
-                                                    cat=pulp.LpInteger)
-        
-        arrived_product = pulp.LpVariable.dicts("arrived_product",
-                                                ((n_r, p, t) for n_r, p, t in product(RECEIVING_NODES, PRODUCTS, PERIODS)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        
-        use_carrying_capacity_option = pulp.LpVariable.dicts("use_carrying_capacity_option",
-                                                        ((n, e_c, t) for n, e_c, t in product(NODES, C_CAPACITY_EXPANSIONS, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpInteger)
-        use_transportation_capacity_option = pulp.LpVariable.dicts("use_transportation_capacity_option",
-                                                        ((o,d,e_t,t) for  o,d, e_t, t in product(DEPARTING_NODES, RECEIVING_NODES, T_CAPACITY_EXPANSIONS, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpInteger)
-        arrived_and_completed_product = pulp.LpVariable.dicts("arrived_and_completed_product",
-                                                ((t, p,n_r) for t, p, n_r in product(PERIODS, PRODUCTS, RECEIVING_NODES)),
-                                                lowBound=0,
-                                                upBound = big_m,
-                                                cat=pulp.LpContinuous)
-        total_arrived_and_completed_product = pulp.LpVariable("total_arrived_and_completed_product",
-                                                lowBound=0,
-                                                upBound = big_m,
-                                                cat=pulp.LpContinuous)
-        resources_assigned = pulp.LpVariable.dicts("resources_assigned",
-                                                        ((r, n, t) for r,n, t in product(RESOURCES, NODES, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
-        resources_added = pulp.LpVariable.dicts("resources_added",
-                                                        ((r, n, t) for r,n, t in product(RESOURCES,NODES, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
-        resources_removed = pulp.LpVariable.dicts("resources_removed",
-                                                        ((r, n, t) for r,n, t in product(RESOURCES,NODES, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
-        resource_capacity = pulp.LpVariable.dicts("resource_capacity",
-                                                        ((r, n, t,c) for r,n, t,c in product(RESOURCES,NODES, PERIODS,RESOURCE_CAPACITY_TYPES)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
-        resource_attribute_consumption = pulp.LpVariable.dicts("resource_attribute_consumption",
-                                                        ((r,t,n,a) for r,t,n,a in product(RESOURCES, PERIODS,NODES,RESOURCE_ATTRIBUTES)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
+
         
         logging.info(f"Added processed, assigned, and capacity option variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
@@ -535,22 +598,6 @@ def run_solver(input_values):
         #     model += (departed_product[n_d, n_r,p,t]  == constraint_expr)
         # logging.info(f"Added constraint to aggregate departed volume by mode: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-        # Add variables
-        ib_carried_over_demand = pulp.LpVariable.dicts("ib_carried_over_demand",
-                                                    ((n_r, p, t) for n_r, p, t in product(RECEIVING_NODES, PRODUCTS, PERIODS)),
-                                                    lowBound=0,
-                                                    cat=pulp.LpContinuous)
-        
-        ob_carried_over_demand = pulp.LpVariable.dicts("ob_carried_over_demand",
-                                                    ((n_d, p, t) for n_d, p, t in product(DEPARTING_NODES, PRODUCTS, PERIODS)),
-                                                    lowBound=0,
-                                                    cat=pulp.LpContinuous)
-
-        dropped_demand = pulp.LpVariable.dicts("dropped_demand",
-                                            ((n, p, t) for n, p, t in product(NODES, PRODUCTS, PERIODS)),
-                                            lowBound=0,
-                                            cat=pulp.LpContinuous)
-        logging.info(f"Added carried over and dropped demand variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
         #resources_assigned equals initial resources assigned, minus resources removed, plus resources added
         for r,n,t,g  in product(RESOURCES, NODES, PERIODS, NODEGROUPS):
@@ -595,25 +642,6 @@ def run_solver(input_values):
             if resource_attribute_consumption_per.get((t,r,a),0) != 0:
                 expr = (resource_attribute_consumption[r,t,n,a] == resources_assigned[r,n,t]*resource_attribute_consumption_per.get((t,r,a),0))
                 model.addConstraint(expr, f"resource_attribute_consumption_{r}_{t}_{n}_{a}")
-        
-
-        #resource add and removal constraints
-        resources_added_binary = pulp.LpVariable.dicts("resources_added_binary",
-                                                        ((r, n, t) for r,n, t in product(RESOURCES,NODES, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpBinary)
-        resources_removed_binary = pulp.LpVariable.dicts("resources_removed_binary",
-                                                        ((r, n, t) for r,n, t in product(RESOURCES,NODES, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpBinary)
-        resource_cohorts_added = pulp.LpVariable.dicts("resource_cohorts_added",
-                                                        ((r, n, t) for r,n, t in product(RESOURCES,NODES, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpInteger)
-        resource_cohorts_removed = pulp.LpVariable.dicts("resource_cohorts_removed",
-                                                        ((r, n, t) for r,n, t in product(RESOURCES,NODES, PERIODS)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpInteger)
 
         #configure binary variables for adding/removing resources
         for r,n,t in product(RESOURCES, NODES, PERIODS):
@@ -633,22 +661,6 @@ def run_solver(input_values):
                 expr = (resources_removed[r,n,t] >= resource_cohorts_removed[r,n,t]*resource_remove_cohort_count.get((t,n,r,g),1))
                 model.addConstraint(expr, f"resources_removed_{r}_{t}_{n}_{g}")
 
-        #resource add and removeal costs
-        resource_add_cost=pulp.LpVariable.dicts("resource_add_cost",
-                                                        ((t,n,r) for t,n,r in product(PERIODS,NODES, RESOURCES)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
-        resource_remove_cost=pulp.LpVariable.dicts("resource_remove_cost",
-                                                        ((t,n,r) for t,n,r in product(PERIODS,NODES, RESOURCES)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
-        resource_time_cost=pulp.LpVariable.dicts("resource_time_cost",
-                                                        ((t,n,r) for t,n,r in product(PERIODS,NODES, RESOURCES)),
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
-        resource_grand_total_cost=pulp.LpVariable("resource_grand_total_cost",
-                                                        lowBound=0,
-                                                        cat=pulp.LpContinuous)
 
         for r,n,t,g in product(RESOURCES, NODES, PERIODS, NODEGROUPS):
             if node_in_nodegroup.get((n,g),0)==1:
@@ -956,64 +968,7 @@ def run_solver(input_values):
         logging.info(f"Added outbound carrying capacity constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
 
-        variable_transportation_costs = pulp.LpVariable.dicts("variable_transportation_costs",
-                                                            ((o, d, t, m, u) for o, d, t, m, u in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES, MEASURES)),
-                                                            lowBound=0, cat="Continuous")
-        fixed_transportation_costs = pulp.LpVariable.dicts("fixed_transportation_costs",
-                                                        ((o, d, t, m, u) for o, d, t, m, u in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES, MEASURES)),
-                                                        lowBound=0, cat="Continuous")
-        transportation_costs = pulp.LpVariable.dicts("transportation_costs",
-                                                    ((o, d, t, m) for o, d, t, m in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES)),
-                                                    lowBound=0, cat="Continuous")
-        od_transportation_costs = pulp.LpVariable.dicts("od_transportation_costs",
-                                                        ((o, d, t) for o, d, t in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS)),
-                                                        lowBound=0, cat="Continuous")
-        mode_transportation_costs = pulp.LpVariable.dicts("mode_transportation_costs",
-                                                        ((t, m) for t, m in product(PERIODS, MODES)),
-                                                        lowBound=0, cat="Continuous")
-        total_od_transportation_costs = pulp.LpVariable.dicts("total_od_transportation_costs",
-                                                            ((o, d) for o, d in product(DEPARTING_NODES, RECEIVING_NODES)),
-                                                            lowBound=0, cat="Continuous")
-        total_mode_transportation_costs = pulp.LpVariable.dicts("total_mode_transportation_costs",
-                                                                MODES,
-                                                                lowBound=0, cat="Continuous")
-        total_time_transportation_costs = pulp.LpVariable.dicts("total_time_transportation_costs",
-                                                                PERIODS,
-                                                                lowBound=0, cat="Continuous")
-        grand_total_transportation_costs = pulp.LpVariable("grand_total_transportation_costs",
-                                                        lowBound=0, cat="Continuous")
-        num_loads_by_group = pulp.LpVariable.dicts("num_loads",
-                                        ((o, d, t, m, g) for o, d, t, m, g in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES, TRANSPORTATION_GROUPS)),
-                                        lowBound=0, cat="Integer")
-        num_loads = pulp.LpVariable.dicts("num_loads",
-                                        ((o, d, t, m) for o, d, t, m in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES)),
-                                        lowBound=0, cat="Integer")
-        od_num_loads = pulp.LpVariable.dicts("od_num_loads",
-                                            ((o, d, t) for o, d, t in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS)),
-                                            lowBound=0, cat="Continuous")
-        mode_num_loads = pulp.LpVariable.dicts("mode_num_loads",
-                                            ((m, t) for m, t in product(MODES, PERIODS)),
-                                            lowBound=0, cat="Continuous")
-        total_od_num_loads = pulp.LpVariable.dicts("total_od_num_loads",
-                                                ((o, d) for o, d in product(DEPARTING_NODES, RECEIVING_NODES)),
-                                                lowBound=0, cat="Continuous")
-        total_mode_num_loads = pulp.LpVariable.dicts("total_mode_num_loads",
-                                                    MODES,
-                                                    lowBound=0, cat="Continuous")
-        total_num_loads = pulp.LpVariable.dicts("total_num_loads",
-                                            PERIODS,
-                                            lowBound=0, cat="Continuous")
-        grand_total_num_loads = pulp.LpVariable("grand_total_num_loads",
-                                                lowBound=0, cat="Continuous")
-        logging.info(f"Added transportation cost variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        departed_measures = pulp.LpVariable.dicts('departed_measures', 
-                                        ((o, d, p, t, m, u) for o, d, p, t, m, u in product(DEPARTING_NODES, RECEIVING_NODES, PRODUCTS, PERIODS, MODES, MEASURES)),
-                                        lowBound=0, cat='Continuous')
-
-        is_launched = pulp.LpVariable.dicts("is_launched", ((o, t) for o, t in product(NODES, PERIODS)),
-                                            cat="Binary")
-
+        
         # Adhere to min and max flow constraints - units
         periods = list(PERIODS) + ['@']
         departing_nodes = list(DEPARTING_NODES) + ['@']
@@ -1182,26 +1137,6 @@ def run_solver(input_values):
                                     model += max_expr, f"resource_attribute_max_constraint_{t_index}_{n_index}_{a_index}_{r_index}_{g_index}"
             logging.info(f"Added resource attribute upper and lower bounds: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-        c_capacity_option_cost = pulp.LpVariable.dicts('c_capacity_option_cost', 
-                                                    ((t, n, e) for t, n, e in product(PERIODS, NODES, C_CAPACITY_EXPANSIONS)),
-                                                    lowBound=0, cat='Continuous')
-        c_capacity_option_cost_by_location_type = pulp.LpVariable.dicts('c_capacity_option_cost_by_location_type', 
-                                                                    ((n, e) for n, e in product(NODES, C_CAPACITY_EXPANSIONS)),
-                                                                    lowBound=0, cat='Continuous')
-        c_capacity_option_cost_by_period_type = pulp.LpVariable.dicts('c_capacity_option_cost_by_period_type', 
-                                                                    ((e, t) for e, t in product(C_CAPACITY_EXPANSIONS, PERIODS)),
-                                                                    lowBound=0, cat='Continuous')
-        c_capacity_option_cost_by_location = pulp.LpVariable.dicts('c_capacity_option_cost_by_location', 
-                                                                NODES, lowBound=0, cat='Continuous')
-        c_capacity_option_cost_by_period = pulp.LpVariable.dicts('c_capacity_option_cost_by_period', 
-                                                                PERIODS, lowBound=0, cat='Continuous')
-        c_capacity_option_cost_by_type = pulp.LpVariable.dicts('c_capacity_option_cost_by_type', 
-                                                            C_CAPACITY_EXPANSIONS, lowBound=0, cat='Continuous')
-        grand_total_c_capacity_option = pulp.LpVariable('grand_total_c_capacity_option', lowBound=0, cat='Continuous')
-        logging.info(f"Added carrying capacity option variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-
-
         # Constraints for capacity option costs
 
         for t, n, e_c in product(PERIODS, NODES, C_CAPACITY_EXPANSIONS):
@@ -1260,23 +1195,6 @@ def run_solver(input_values):
             departed_measures_expr = departed_measures[o, d, p, t, m, u] == pulp.lpSum(departed_product_by_mode[o,d,p,t,m] * products_measures.get((p,u),0) for p in PRODUCTS)
             model += departed_measures_expr, f"DepartedMeasures_{o}_{d}_{p}_{t}_{m}_{u}"
 
-        t_capacity_option_cost = pulp.LpVariable.dicts('t_capacity_option_cost', 
-                                                    ((t, o,d, e) for t, o,d, e in product(PERIODS, DEPARTING_NODES,RECEIVING_NODES, T_CAPACITY_EXPANSIONS)),
-                                                    lowBound=0, cat='Continuous')
-        t_capacity_option_cost_by_location_type = pulp.LpVariable.dicts('t_capacity_option_cost_by_location_type', 
-                                                                    ((o,d, e) for o,d, e in product(DEPARTING_NODES,RECEIVING_NODES, T_CAPACITY_EXPANSIONS)),
-                                                                    lowBound=0, cat='Continuous')
-        t_capacity_option_cost_by_period_type = pulp.LpVariable.dicts('t_capacity_option_cost_by_period_type', 
-                                                                    ((e, t) for e, t in product(T_CAPACITY_EXPANSIONS, PERIODS)),
-                                                                    lowBound=0, cat='Continuous')
-        t_capacity_option_cost_by_location = pulp.LpVariable.dicts('t_capacity_option_cost_by_location', 
-                                                                    ((o,d) for o,d in product(DEPARTING_NODES,RECEIVING_NODES)),
-                                                                    lowBound=0, cat='Continuous')
-        t_capacity_option_cost_by_period = pulp.LpVariable.dicts('t_capacity_option_cost_by_period', 
-                                                                PERIODS, lowBound=0, cat='Continuous')
-        t_capacity_option_cost_by_type = pulp.LpVariable.dicts('t_capacity_option_cost_by_type', 
-                                                            T_CAPACITY_EXPANSIONS, lowBound=0, cat='Continuous')
-        grand_total_t_capacity_option = pulp.LpVariable('grand_total_t_capacity_option', lowBound=0, cat='Continuous')
 
         for t, o,d, e_t in product(PERIODS, DEPARTING_NODES, RECEIVING_NODES, T_CAPACITY_EXPANSIONS):
             t_constraint_expr = (
@@ -1339,109 +1257,6 @@ def run_solver(input_values):
         model += constraint_expr, "GrandTotalTransportationCapacityOption"
         logging.info(f"Added transportation capacity option cost constrainst: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-
-        dropped_volume_cost = pulp.LpVariable.dicts("dropped_volume_cost",
-                                        ((n, p, t, a)  for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES)),
-                                            lowBound=0, cat="Continuous")
-
-        ib_carried_volume_cost = pulp.LpVariable.dicts("ib_carried_volume_cost",
-                                        ((n, p, t, a)  for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES)),
-                                                    lowBound=0, cat="Continuous")
-        ob_carried_volume_cost = pulp.LpVariable.dicts("ob_carried_volume_cost",
-                                        ((n, p, t, a)  for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES)),
-                                                    lowBound=0, cat="Continuous")
-
-        dropped_volume_cost_by_period = pulp.LpVariable.dicts("dropped_volume_cost_by_period",
-                                                            PERIODS, lowBound=0, cat="Continuous")
-
-        ib_carried_volume_cost_by_period = pulp.LpVariable.dicts("ib_carried_volume_cost_by_period",
-                                                            PERIODS, lowBound=0, cat="Continuous")
-        ob_carried_volume_cost_by_period = pulp.LpVariable.dicts("ob_carried_volume_cost_by_period",
-                                                            PERIODS, lowBound=0, cat="Continuous")
-
-        dropped_volume_cost_by_product = pulp.LpVariable.dicts("dropped_volume_cost_by_product",
-                                                                PRODUCTS, lowBound=0, cat="Continuous")
-
-        ib_carried_volume_cost_by_product = pulp.LpVariable.dicts("ib_carried_volume_cost_by_product",
-                                                                PRODUCTS, lowBound=0, cat="Continuous")
-        ob_carried_volume_cost_by_product = pulp.LpVariable.dicts("ob_carried_volume_cost_by_product",
-                                                                PRODUCTS, lowBound=0, cat="Continuous")
-        dropped_volume_cost_by_node = pulp.LpVariable.dicts("dropped_volume_cost_by_node",
-                                                         NODES,
-                                                lowBound=0, cat="Continuous")
-
-        ib_carried_volume_cost_by_node = pulp.LpVariable.dicts("ib_carried_volume_cost_by_node",
-                                                        NODES,
-                                                        lowBound=0, cat="Continuous")
-        ob_carried_volume_cost_by_node = pulp.LpVariable.dicts("_obcarried_volume_cost_by_node",
-                                                        NODES,
-                                                        lowBound=0, cat="Continuous")
-
-        # dropped_volume_cost_by_node_time = pulp.LpVariable.dicts("dropped_volume_cost_by_node_time",
-        #                                                 ((n, t )  for n, t in product(NODES, PERIODS)),
-        #                                                         lowBound=0, cat="Continuous")
-
-        ib_carried_volume_cost_by_node_time = pulp.LpVariable.dicts("ib_carried_volume_cost_by_node_time",
-                                                        ((n, t )  for n, t in product(NODES, PERIODS)),
-                                                                lowBound=0, cat="Continuous")
-        ob_carried_volume_cost_by_node_time = pulp.LpVariable.dicts("ob_carried_volume_cost_by_node_time",
-                                                        ((n, t )  for n, t in product(NODES, PERIODS)),
-                                                                lowBound=0, cat="Continuous")
-
-        dropped_volume_cost_by_product_time = pulp.LpVariable.dicts("dropped_volume_cost_by_product_time",
-                                                        ((p,  t )  for p,  t in product(PRODUCTS, PERIODS)),
-                                                                    lowBound=0, cat="Continuous")
-
-        ib_carried_volume_cost_by_product_time = pulp.LpVariable.dicts("ib_carried_volume_cost_by_product_time",
-                                                        ((p,  t )  for p,  t in product(PRODUCTS, PERIODS)),
-                                                                    lowBound=0, cat="Continuous")
-        ob_carried_volume_cost_by_product_time = pulp.LpVariable.dicts("ob_carried_volume_cost_by_product_time",
-                                                        ((p,  t )  for p,  t in product(PRODUCTS, PERIODS)),
-                                                                    lowBound=0, cat="Continuous")
-
-        total_dropped_volume_cost = pulp.LpVariable("total_dropped_volume_cost", lowBound=0, cat="Continuous")
-
-        total_ib_carried_volume_cost = pulp.LpVariable("total_ib_carried_volume_cost", lowBound=0, cat="Continuous")
-        total_ob_carried_volume_cost = pulp.LpVariable("total_ob_carried_volume_cost", lowBound=0, cat="Continuous")
-
-        # Age variables
-        vol_arrived_by_age = pulp.LpVariable.dicts("vol_arrived_by_age",
-                                                ((n_r, p, t, a) for n_r, p, t, a in product(RECEIVING_NODES, PRODUCTS, PERIODS, AGES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        ib_vol_carried_over_by_age = pulp.LpVariable.dicts("ib_vol_carried_over_by_age",
-                                                ((n_r, p, t, a) for n_r, p, t, a in product(RECEIVING_NODES, PRODUCTS, PERIODS, AGES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        ob_vol_carried_over_by_age = pulp.LpVariable.dicts("ob_vol_carried_over_by_age",
-                                                ((n_d, p, t, a) for n_d, p, t, a in product(DEPARTING_NODES, PRODUCTS, PERIODS, AGES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        vol_processed_by_age = pulp.LpVariable.dicts("vol_processed_by_age",
-                                                ((n, p, t, a) for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        vol_departed_by_age = pulp.LpVariable.dicts("vol_departed_by_age",
-                                                ((n_d,n_r, p, t, a,m) for n_d, n_r, p, t, a,m in product(DEPARTING_NODES,RECEIVING_NODES, PRODUCTS, PERIODS, AGES,MODES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        vol_dropped_by_age = pulp.LpVariable.dicts("vol_dropped_by_age",
-                                                ((n, p, t, a) for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        demand_by_age = pulp.LpVariable.dicts("demand_by_age",
-                                                ((n, p, t, a) for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        age_violation_cost = pulp.LpVariable.dicts("age_violation_cost",
-                                                ((n, p, t, a) for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES)),
-                                                lowBound=0,
-                                                cat=pulp.LpContinuous)
-        logging.info(f"Added age variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-
-        grand_total_carried_and_dropped_volume_cost = pulp.LpVariable("grand_total_carried_and_dropped_volume_cost", lowBound=0, cat="Continuous")
-        logging.info(f"Added carried and dropped cost variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
         for n, t, p,g, a in product(RECEIVING_NODES, PERIODS, PRODUCTS, NODEGROUPS, AGES):
             carried_volume_cost_expr = (ib_carried_volume_cost[n,p,t, a] >= period_weight.get((int(t)),1) * ib_vol_carried_over_by_age[n,p,t,a] * ib_carrying_cost.get((t,p,n,g),0))	
             model += carried_volume_cost_expr, f"ib_carried_volume_cost_{n}_{p}_{t}_{g}_{a}"
@@ -1563,10 +1378,6 @@ def run_solver(input_values):
                                                     pulp.lpSum(variable_transportation_costs[o,d,t,m,u] + fixed_transportation_costs[o,d,t,m,u] for u in MEASURES))
                     model += transportation_costs_constraint, f"transportation_costs_{o}_{d}_{t}_{m}_{g}_{g2}"
 
-        binary_product_destination_assignment = pulp.LpVariable.dicts("binary_product_destination_assignment", 
-                                                                    ((o, t, p, d) for o, t, p, d in product(DEPARTING_NODES, PERIODS, PRODUCTS, RECEIVING_NODES)),
-                                                                    cat="Binary")
-
         if transportation_cost_minimum:
             for o, d, t, m, p, g, g2 in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES,PRODUCTS, NODEGROUPS, NODEGROUPS):
                 if node_in_nodegroup.get((o,g),0)==1 and node_in_nodegroup.get((d,g2),0)==1:
@@ -1600,34 +1411,10 @@ def run_solver(input_values):
         model += grand_total_transportation_costs_constraint, "grand_total_transportation_costs"
         logging.info(f"Added transportation cost constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-        variable_operating_costs = pulp.LpVariable.dicts("variable_operating_costs",
-                                                ((o, p, t) for o, p, t in product(NODES, PRODUCTS, PERIODS)),
-                                                lowBound=0, cat="Continuous")
-
-        fixed_operating_costs = pulp.LpVariable.dicts("fixed_operating_costs",
-                                                    ((o, t) for o, t in product(NODES, PERIODS)),
-                                                    lowBound=0, cat="Continuous")
-
-        operating_costs = pulp.LpVariable.dicts("operating_costs",
-                                                ((o, t) for o, t in product(NODES, PERIODS)),
-                                                lowBound=0, cat="Continuous")
-
-        operating_costs_by_origin = pulp.LpVariable.dicts("operating_costs_by_origin",
-                                                        NODES,
-                                                        lowBound=0, cat="Continuous")
-
-        total_operating_costs = pulp.LpVariable.dicts("total_operating_costs",
-                                                    PERIODS,
-                                                    lowBound=0, cat="Continuous")
-        logging.info(f"Added operating cost variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
         for o, p, t, g in product(NODES, PRODUCTS, PERIODS,NODEGROUPS):
             if node_in_nodegroup.get((o,g),0)==1:
                 constraint_expr = variable_operating_costs[o, p, t] == period_weight.get((int(t)),1) * operating_costs_variable.get((t, o, p, g),0) * processed_product[o, p, t]
                 model += constraint_expr, f"variable_operating_costs_{o}_{p}_{t}_{g}"
-
-        is_site_operating = pulp.LpVariable.dicts("is_site_operating",
-                                                ((o, t) for o, t in product(NODES, PERIODS)),
-                                                lowBound=0, upBound=1, cat="Binary")
 
         for o, t in product(NODES, PERIODS):
             constraint_expr = is_site_operating[o, t] * big_m >= pulp.lpSum(
@@ -1659,19 +1446,12 @@ def run_solver(input_values):
             )
             model += constraint_expr, f"total_operating_costs_{t}"
         logging.info(f"Added operating cost constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-        grand_total_operating_costs = pulp.LpVariable("grand_total_operating_costs", lowBound=0, cat="Continuous")
+        
 
         grand_total_operating_costs_constraint = (grand_total_operating_costs == pulp.lpSum(total_operating_costs[t] for t in PERIODS))
         model += grand_total_operating_costs_constraint, "grand_total_operating_costs"
 
-        total_launch_cost = pulp.LpVariable.dicts("total_launch_cost", ((o, t) for o, t in product(NODES, PERIODS)),
-                                                lowBound=0, cat="Continuous")
-
-        launch_costs_by_period = pulp.LpVariable.dicts("launch_costs_by_period", PERIODS, lowBound=0, cat="Continuous")
-
-        grand_total_launch_cost = pulp.LpVariable("grand_total_launch_cost", lowBound=0, cat="Continuous")
-
-        logging.info(f"Added launch cost variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
+       
 
         #node max launch count
         for o in NODES:
@@ -1701,17 +1481,6 @@ def run_solver(input_values):
         model += grand_total_launch_cost_constraint_2, "grand_total_launch_cost_2"
         logging.info(f"Added launch cost constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-
-        total_shut_down_cost = pulp.LpVariable.dicts("total_shut_down_cost", ((o, t) for o, t in product(NODES, PERIODS)),
-                                                lowBound=0, cat="Continuous")
-
-        shut_down_costs_by_period = pulp.LpVariable.dicts("shut_down_costs_by_period", PERIODS, lowBound=0, cat="Continuous")
-
-        grand_total_shut_down_cost = pulp.LpVariable("grand_total_shut_down_cost", lowBound=0, cat="Continuous")
-
-        is_shut_down = pulp.LpVariable.dicts("is_shut_down", ((o, t) for o, t in product(NODES, PERIODS)),
-                                            cat="Binary")
-        logging.info(f"Added shut_down cost variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
         #if the node processes volume then it must have been launched at or before the same period
         for o, t in product(NODES, PERIODS):
@@ -1799,10 +1568,7 @@ def run_solver(input_values):
             constraint_expr = (is_site_operating[o, t] <= pulp.lpSum(is_launched[o,t2] for t2 in PERIODS if t2 <= t)- pulp.lpSum(is_shut_down[o,t2] for t2 in PERIODS if t2 <= t))
             model += constraint_expr, f"is_site_operating_shut_down_constraint_{o}_{t}"
         
-        is_destination_assigned_to_origin = pulp.LpVariable.dicts("is_destination_assigned_to_origin",
-                                                        ((o, d, t) for o, d, t in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS)),
-                                                        cat="Binary")
-
+     
         if flow_constraints_min_connections or flow_constraints_max_connections:
             for o_index in departing_nodes:
                 for g_index in nodegroups:
@@ -1868,24 +1634,6 @@ def run_solver(input_values):
                         model += transit_time_constraint, f"transit_time_{n_d}_{n_r}_{t}_{m}_{g}_{n_r}_{g2}"
             logging.info(f"Added volume move constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-        pop_cost = pulp.LpVariable.dicts("pop_cost", 
-                                        ((t1, t2, p, o, d) for t1, t2, p, o, d in product(PERIODS, PERIODS, PRODUCTS, DEPARTING_NODES, RECEIVING_NODES)),
-                                        lowBound=0, cat="Continuous")
-
-        volume_moved = pulp.LpVariable.dicts("volume_moved", 
-                                            ((t1, t2, p, o, d) for t1, t2, p, o, d in product(PERIODS, PERIODS, PRODUCTS, DEPARTING_NODES, RECEIVING_NODES)),
-                                            lowBound=0, cat="Continuous")
-        total_volume_moved = pulp.LpVariable("total_volume_moved", 
-                                            lowBound=0, cat="Continuous")
-        num_destinations_moved = pulp.LpVariable.dicts("destinations_moved", 
-                                            ((t1, t2, p, o, d) for t1, t2, p, o, d in product(PERIODS, PERIODS, PRODUCTS, DEPARTING_NODES, RECEIVING_NODES)),
-                                            lowBound=0, cat="Integer")
-        total_num_destinations_moved = pulp.LpVariable("total_num_destinations_moved", 
-                                            lowBound=0, cat="Continuous")
-
-        grand_total_pop_cost = pulp.LpVariable("grand_total_pop_cost", lowBound=0, cat="Continuous")
-        logging.info(f"Added plan-over-plan cost variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
         for o, t, p, d in product(DEPARTING_NODES, PERIODS, PRODUCTS, RECEIVING_NODES):
             binary_assignment_lower_constraint = (binary_product_destination_assignment[o,t,p,d]*big_m >= 
                                                 departed_product[o,d,p,t])
@@ -1926,10 +1674,6 @@ def run_solver(input_values):
 
         logging.info(f"Added plan-over-plan cost constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
         logging.info(f"Compile model time: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        node_utilization = pulp.LpVariable.dicts("node_utilization", 
-                                        ((n,t,c) for n,t,c in product(NODES, PERIODS,RESOURCE_CAPACITY_TYPES)),
-                                        lowBound=0, cat="Continuous")
         
         if resource_capacity_consumption:
             for r, n,t,c,g in product(RESOURCES, NODES,PERIODS,RESOURCE_CHILD_CAPACITY_TYPES, NODEGROUPS):
@@ -2045,15 +1789,11 @@ def run_solver(input_values):
                     expr = ( (demand_by_age[d, p, t, a]-max_vol_by_age.get((t,p,d,a,g),big_m))*age_constraint_violation_cost.get((t,p,d,a,g),big_m)<=age_violation_cost[d, p, t, a] )
                     model.addConstraint(expr, f"max_volume_by_age_violation_cost_constraint_{d}_{p}_{t}_{a}_{g}")
             
-        grand_total_age_violation_cost = pulp.LpVariable("grand_total_age_violation_cost", lowBound=0, cat="Continuous")
+        # grand_total_age_violation_cost = pulp.LpVariable("grand_total_age_violation_cost", lowBound=0, cat="Continuous")
         expr = (grand_total_age_violation_cost == pulp.lpSum(age_violation_cost[d, p, t, a] for d in DESTINATIONS for p in PRODUCTS for t in PERIODS for a in AGES))
         model.addConstraint(expr, f"grand_total_age_violation_cost_constraint")
 
         logging.info(f"Added age constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        max_transit_distance = pulp.LpVariable("max_transit_distance", lowBound=0, cat="Continuous")
-        max_age = pulp.LpVariable("max_age", lowBound=0, cat="integer")
-        max_capacity_utilization = pulp.LpVariable("max_capacity_utilization", lowBound=0, cat="Continuous")
 
         for n,t,c in product(NODES, PERIODS, RESOURCE_CAPACITY_TYPES):
             expr = (max_capacity_utilization>=node_utilization[n,t,c])
@@ -2063,7 +1803,7 @@ def run_solver(input_values):
             expr = (max_transit_distance>= binary_product_destination_assignment[o, t, p, d] * distance.get((o,d,m),big_m))
             model.addConstraint(expr, f"max_transit_distance_constraint_{o}_{t}_{d}_{p}_{m}")
 
-        is_age_received = pulp.LpVariable.dicts("is_age_received", AGES, cat="binary")
+        # is_age_received = pulp.LpVariable.dicts("is_age_received", AGES, cat="binary")
         for a in AGES:
             expr = (max_age >= is_age_received[a]*int(a))
             model.addConstraint(expr, f"max_age_constraint_{a}")
@@ -2073,239 +1813,12 @@ def run_solver(input_values):
             expr = (pulp.lpSum(demand_by_age[d, p, t, a] for d in DESTINATIONS for p in PRODUCTS for t in PERIODS )<=is_age_received[a]*big_m )
             model.addConstraint(expr, f"binary_is_age_received_constraint_{a}")
 
-        variables = {
-            "grand_total_transportation_costs":grand_total_transportation_costs,
-            "grand_total_operating_costs":grand_total_operating_costs,
-            "grand_total_c_capacity_option":grand_total_c_capacity_option,
-            "grand_total_t_capacity_option":grand_total_t_capacity_option,
-            "grand_total_carried_and_dropped_volume_cost":grand_total_carried_and_dropped_volume_cost,
-            "grand_total_launch_cost":grand_total_launch_cost,
-            "grand_total_shut_down_cost":grand_total_shut_down_cost,
-            "grand_total_pop_cost":grand_total_pop_cost,
-            "ib_carried_over_demand":ib_carried_over_demand,
-            "ob_carried_over_demand":ob_carried_over_demand,
-            "dropped_demand":dropped_demand,
-            "binary_product_destination_assignment":binary_product_destination_assignment,
-            "departed_product":departed_product,
-            "departed_product_by_mode":departed_product_by_mode,
-            "processed_product":processed_product,
-            "arrived_product":arrived_product,
-            "pop_cost":pop_cost,
-            "volume_moved":volume_moved,
-            "is_destination_assigned_to_origin":is_destination_assigned_to_origin,
-            "launch_costs_by_period":launch_costs_by_period,
-            "total_launch_cost":total_launch_cost,
-            "is_launched":is_launched,
-            "is_shut_down":is_shut_down,
-            "is_site_operating":is_site_operating,
-            "shut_down_costs_by_period":shut_down_costs_by_period,
-            "total_shut_down_cost":total_shut_down_cost,
-            "use_carrying_capacity_option":use_carrying_capacity_option,
-            "c_capacity_option_cost":c_capacity_option_cost,
-            "c_capacity_option_cost_by_location_type":c_capacity_option_cost_by_location_type,
-            "c_capacity_option_cost_by_period_type":c_capacity_option_cost_by_period_type,
-            "c_capacity_option_cost_by_location":c_capacity_option_cost_by_location,
-            "c_capacity_option_cost_by_period":c_capacity_option_cost_by_period,
-            "c_capacity_option_cost_by_type":c_capacity_option_cost_by_type,
-            "t_capacity_option_cost":t_capacity_option_cost,
-            "t_capacity_option_cost_by_location_type":t_capacity_option_cost_by_location_type,
-            "t_capacity_option_cost_by_period_type":t_capacity_option_cost_by_period_type,
-            "t_capacity_option_cost_by_location":t_capacity_option_cost_by_location,
-            "t_capacity_option_cost_by_period":t_capacity_option_cost_by_period,
-            "t_capacity_option_cost_by_type":t_capacity_option_cost_by_type,
-            "dropped_volume_cost":dropped_volume_cost,
-            "ib_carried_volume_cost":ib_carried_volume_cost,
-            "ob_carried_volume_cost":ob_carried_volume_cost,
-            "dropped_volume_cost_by_period":dropped_volume_cost_by_period,
-            "ib_carried_volume_cost_by_period":ib_carried_volume_cost_by_period,
-            "ob_carried_volume_cost_by_period":ob_carried_volume_cost_by_period,
-            "dropped_volume_cost_by_product":dropped_volume_cost_by_product,
-            "ib_carried_volume_cost_by_product":ib_carried_volume_cost_by_product,
-            "ob_carried_volume_cost_by_product":ob_carried_volume_cost_by_product,
-            "dropped_volume_cost_by_node":dropped_volume_cost_by_node,
-            "ib_carried_volume_cost_by_node":ib_carried_volume_cost_by_node,
-            "ob_carried_volume_cost_by_node":ob_carried_volume_cost_by_node,
-            # "dropped_volume_cost_by_node_time":dropped_volume_cost_by_node_time,
-            "ib_carried_volume_cost_by_node_time":ib_carried_volume_cost_by_node_time,
-            "ob_carried_volume_cost_by_node_time":ob_carried_volume_cost_by_node_time,
-            "dropped_volume_cost_by_product_time":dropped_volume_cost_by_product_time,
-            "ib_carried_volume_cost_by_product_time":ib_carried_volume_cost_by_product_time,
-            "ob_carried_volume_cost_by_product_time":ob_carried_volume_cost_by_product_time,
-            "total_dropped_volume_cost":total_dropped_volume_cost,
-            "total_ib_carried_volume_cost":total_ib_carried_volume_cost,
-            "total_ob_carried_volume_cost":total_ob_carried_volume_cost,
-            "fixed_transportation_costs":fixed_transportation_costs,
-            "mode_num_loads":mode_num_loads,
-            "mode_transportation_costs":mode_transportation_costs,
-            "num_loads":num_loads,
-            "od_num_loads":od_num_loads,
-            "od_transportation_costs":od_transportation_costs,
-            "total_mode_num_loads":total_mode_num_loads,
-            "total_mode_transportation_costs":total_mode_transportation_costs,
-            "total_num_loads":total_num_loads,
-            "total_od_num_loads":total_od_num_loads,
-            "total_od_transportation_costs":total_od_transportation_costs,
-            "total_time_transportation_costs":total_time_transportation_costs,
-            "transportation_costs":transportation_costs,
-            "variable_transportation_costs":variable_transportation_costs,
-            "departed_measures": departed_measures,
-            "node_utilization":node_utilization,
-            "vol_arrived_by_age":vol_arrived_by_age,
-            "ib_vol_carried_over_by_age":ib_vol_carried_over_by_age,
-            "ob_vol_carried_over_by_age":ob_vol_carried_over_by_age,
-            "vol_processed_by_age":vol_processed_by_age,
-            "vol_departed_by_age":vol_departed_by_age,
-            "vol_dropped_by_age":vol_dropped_by_age,
-            "age_violation_cost":age_violation_cost,
-            "demand_by_age":demand_by_age,
-            "max_transit_distance":max_transit_distance,
-            "max_age":max_age,
-            "max_capacity_utilization":max_capacity_utilization,
-            "is_age_received":is_age_received,
-            "num_destinations_moved":num_destinations_moved,
-            "total_volume_moved":total_volume_moved,
-            "demand_by_age":demand_by_age,
-            "vol_departed_by_age":vol_departed_by_age,
-            "vol_processed_by_age":vol_processed_by_age,
-            "ib_vol_carried_over_by_age":ib_vol_carried_over_by_age,
-            "ob_vol_carried_over_by_age":ob_vol_carried_over_by_age,
-            "vol_dropped_by_age":vol_dropped_by_age,
-            "age_violation_cost":age_violation_cost,
-            "grand_total_age_violation_cost":grand_total_age_violation_cost,
-            "arrived_and_completed_product":arrived_and_completed_product,
-            "total_arrived_and_completed_product":total_arrived_and_completed_product,
-            "resource_capacity":resource_capacity,
-            "resource_add_cost":resource_add_cost,
-            "resource_remove_cost":resource_remove_cost,
-            "resource_time_cost":resource_time_cost,
-            "resource_grand_total_cost":resource_grand_total_cost,
-            "resources_assigned":resources_assigned,
-            "resource_attribute_consumption":resource_attribute_consumption,
-            "resources_added":resources_added,
-            "resources_removed":resources_removed,
-            "use_transportation_capacity_option":use_transportation_capacity_option
-        }
-
         # Create constraint handlers
         flow_constraints = FlowConstraints(variables, list_of_sets, list_of_parameters)
 
         # Add constraints to model
         flow_constraints.build(model)
 
-        dimensions = {
-            "grand_total_transportation_costs":[],
-            "grand_total_operating_costs":[],
-            "grand_total_c_capacity_option":[],
-            "grand_total_t_capacity_option":[],
-            "grand_total_carried_and_dropped_volume_cost":[],
-            "grand_total_launch_cost":[],
-            "grand_total_shut_down_cost":[],
-            "grand_total_pop_cost":[],
-            "ib_carried_over_demand":['RECEIVING_NODES','PRODUCTS','PERIODS'],
-            "ob_carried_over_demand":['DEPARTING_NODES','PRODUCTS','PERIODS'],
-            "dropped_demand":['NODES','PRODUCTS','PERIODS'],
-            "binary_product_destination_assignment":['DEPARTING_NODES','PERIODS','PRODUCTS','RECEIVING_NODES'],
-            "departed_product":['DEPARTING_NODES','RECEIVING_NODES','PRODUCTS','PERIODS'],
-            "departed_product_by_mode":['DEPARTING_NODES','RECEIVING_NODES','PRODUCTS','PERIODS','MODES'],
-            "processed_product":['NODES','PRODUCTS','PERIODS'],
-            "arrived_product":['RECEIVING_NODES','PRODUCTS','PERIODS'],
-            "pop_cost":['PERIODS','PERIODS','PRODUCTS','DEPARTING_NODES', 'RECEIVING_NODES'],
-            "volume_moved":['PERIODS','PERIODS','PRODUCTS','DEPARTING_NODES', 'RECEIVING_NODES'],
-            "is_destination_assigned_to_origin":['DEPARTING_NODES', 'RECEIVING_NODES','PERIODS'],
-            "launch_costs_by_period":['PERIODS'],
-            "total_launch_cost":['ORIGINS','PERIODS'],
-            "shut_down_costs_by_period":['PERIODS'],
-            "total_shut_down_cost":['ORIGINS','PERIODS'],
-            "is_launched":['NODES','PERIODS'],
-            "is_shut_down":['NODES','PERIODS'],
-            "is_site_operating":['NODES','PERIODS'],
-            "use_carrying_capacity_option":['NODES','C_CAPACITY_EXPANSIONS','PERIODS'],
-            "c_capacity_option_cost":['PERIODS','NODES','C_CAPACITY_EXPANSIONS'],
-            "c_capacity_option_cost_by_location_type":['NODES','C_CAPACITY_EXPANSIONS'],
-            "c_capacity_option_cost_by_period_type":['C_CAPACITY_EXPANSIONS','PERIODS'],
-            "c_capacity_option_cost_by_location":['NODES'],
-            "c_capacity_option_cost_by_period":['PERIODS'],
-            "c_capacity_option_cost_by_type":['C_CAPACITY_EXPANSIONS'],
-            "t_capacity_option_cost":['PERIODS','DEPARTING_NODES', 'RECEIVING_NODES','T_CAPACITY_EXPANSIONS'],
-            "t_capacity_option_cost_by_location_type":['DEPARTING_NODES', 'RECEIVING_NODES','T_CAPACITY_EXPANSIONS'],
-            "t_capacity_option_cost_by_period_type":['T_CAPACITY_EXPANSIONS','PERIODS'],
-            "t_capacity_option_cost_by_location":['DEPARTING_NODES', 'RECEIVING_NODES'],
-            "t_capacity_option_cost_by_period":['PERIODS'],
-            "t_capacity_option_cost_by_type":['T_CAPACITY_EXPANSIONS'],
-            "dropped_volume_cost":['NODES','PRODUCTS','PERIODS','AGES'],
-            "ib_carried_volume_cost":['NODES','PRODUCTS','PERIODS','AGES'],
-            "ob_carried_volume_cost":['NODES','PRODUCTS','PERIODS','AGES'],
-            "dropped_volume_cost_by_period":['PERIODS'],
-            "ib_carried_volume_cost_by_period":['PERIODS'],
-            "ob_carried_volume_cost_by_period":['PERIODS'],
-            "dropped_volume_cost_by_product":['PRODUCTS'],
-            "ib_carried_volume_cost_by_product":['PRODUCTS'],
-            "ob_carried_volume_cost_by_product":['PRODUCTS'],
-            "dropped_volume_cost_by_node":['NODES'],
-            "ib_carried_volume_cost_by_node":['NODES'],
-            "ob_carried_volume_cost_by_node":['NODES'],
-            # "dropped_volume_cost_by_node_time":['NODES','PERIODS'],
-            "ib_carried_volume_cost_by_node_time":['NODES','PERIODS'],
-            "ob_carried_volume_cost_by_node_time":['NODES','PERIODS'],
-            "dropped_volume_cost_by_product_time":['PRODUCTS','PERIODS'],
-            "ib_carried_volume_cost_by_product_time":['PRODUCTS','PERIODS'],
-            "ob_carried_volume_cost_by_product_time":['PRODUCTS','PERIODS'],
-            "total_dropped_volume_cost":[],
-            "total_ib_carried_volume_cost":[],
-            "total_ob_carried_volume_cost":[],
-            "fixed_transportation_costs":['DEPARTING_NODES','RECEIVING_NODES','PERIODS','MODES','MEASURES'],
-            "mode_num_loads":['MODES','PERIODS'],
-            "mode_transportation_costs":['PERIODS','MODES'],
-            "num_loads":['DEPARTING_NODES','RECEIVING_NODES','PERIODS','MODES'],
-            "od_num_loads":['DEPARTING_NODES','RECEIVING_NODES','PERIODS'],
-            "od_transportation_costs":['DEPARTING_NODES','RECEIVING_NODES','PERIODS'],
-            "total_mode_num_loads":['MODES'],
-            "total_mode_transportation_costs":['MODES'],
-            "total_num_loads":['PERIODS'],
-            "total_od_num_loads":['DEPARTING_NODES','RECEIVING_NODES'],
-            "total_od_transportation_costs":['DEPARTING_NODES','RECEIVING_NODES'],
-            "total_time_transportation_costs":['PERIODS'],
-            "transportation_costs":['DEPARTING_NODES','RECEIVING_NODES','PERIODS','MODES'],
-            "variable_transportation_costs":['DEPARTING_NODES','RECEIVING_NODES','PERIODS','MODES','MEASURES'],
-            "departed_measures": ["DEPARTING_NODES", "RECEIVING_NODES", "PRODUCTS", "PERIODS", "MODES", "MEASURES"],
-            "node_utilization": ["NODES", "PERIODS", "RESOURCE_CAPACITY_TYPES"],
-            "vol_arrived_by_age":['RECEIVING_NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "ib_vol_carried_over_by_age":['RECEIVING_NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "ob_vol_carried_over_by_age":['DEPARTING_NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "vol_processed_by_age":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "vol_departed_by_age":['DEPARTING_NODES','RECEIVING_NODES', 'PRODUCTS', 'PERIODS', 'AGES', 'MODES'],
-            "vol_dropped_by_age":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "age_violation_cost":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "demand_by_age":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "max_transit_distance":[],
-            "max_age":[],
-            "max_capacity_utilization":[],
-            "is_age_received":['AGES'],
-            "num_destinations_moved":['PERIODS','PERIODS','PRODUCTS','DEPARTING_NODES', 'RECEIVING_NODES'],
-            "total_volume_moved":[],
-            "demand_by_age":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "vol_departed_by_age":['DEPARTING_NODES','RECEIVING_NODES', 'PRODUCTS', 'PERIODS', 'AGES','MODES'],
-            "vol_processed_by_age":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "ib_vol_carried_over_by_age":['RECEIVING_NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "ob_vol_carried_over_by_age":['DEPARTING_NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "vol_dropped_by_age":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "age_violation_cost":['NODES', 'PRODUCTS', 'PERIODS', 'AGES'],
-            "grand_total_age_violation_cost":[],
-            "arrived_and_completed_product":['PERIODS','PRODUCTS','RECEIVING_NODES'],
-            "total_arrived_and_completed_product":[],
-            "resource_capacity":['RESOURCES','NODES', 'PERIODS','RESOURCE_CAPACITY_TYPES'],
-            "resource_add_cost":['PERIODS','NODES','RESOURCES'],
-            "resource_remove_cost":['PERIODS','NODES','RESOURCES'],
-            "resource_time_cost":['PERIODS','NODES','RESOURCES'],
-            "resource_grand_total_cost":[],
-            "resources_assigned":['RESOURCES','NODES','PERIODS'],
-            "resource_attribute_consumption":['RESOURCES','PERIODS','NODES','RESOURCE_ATTRIBUTES'],
-            "resources_added":['RESOURCES','NODES','PERIODS'],
-            "resources_removed":['RESOURCES','NODES','PERIODS'],
-            "use_transportation_capacity_option":["DEPARTING_NODES", "RECEIVING_NODES", "T_CAPACITY_EXPANSIONS", "PERIODS"]
-        }
-
-    
         solve_start =datetime.now()
         result = get_solver_results(model,objectives_input,parameters_input,list_of_sets,list_of_parameters,variables)
         logging.info(f"Solver time: {round((datetime.now() - solve_start).seconds, 0)} seconds.")
