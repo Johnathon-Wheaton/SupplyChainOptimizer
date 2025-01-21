@@ -17,6 +17,7 @@ from data.preprocessors import DataPreprocessor
 from data.processors import ResultsProcessor
 from data.processors import ScenarioProcessor
 from data.processors import ParameterProcessor
+from optimization.variables import VariableCreator
 
 def read_input_file(file):
     reader = ExcelReader(file)
