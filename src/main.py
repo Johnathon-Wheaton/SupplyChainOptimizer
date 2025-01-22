@@ -7,10 +7,11 @@ import os.path
 import logging
 from logging.handlers import RotatingFileHandler
 import re
+from typing import Dict, Any, List, Set, Tuple
 from data.readers import ExcelReader
 from data.writers import ExcelWriter
 from models.network import Network
-from optimization.constraints import FlowConstraints
+from optimization.constraints import FlowConstraints, AgeConstraints
 from optimization.objectives.objective_handler import ObjectiveHandler
 from optimization.solvers import MILPSolver
 from data.preprocessors import DataPreprocessor
@@ -18,6 +19,8 @@ from data.processors import ResultsProcessor
 from data.processors import ScenarioProcessor
 from data.processors import ParameterProcessor
 from optimization.variables import VariableCreator
+from config import Settings
+from utils import NetworkOptimizerLogger, log_execution_time, TimedOperation, SolverProgressLogger
 
 def read_input_file(file):
     reader = ExcelReader(file)
@@ -27,7 +30,7 @@ def export_results(results, output_file_name):
     writer = ExcelWriter(output_file_name)
     writer.write(results)
 
-def get_solver_results(model, objectives_input, parameters_input, list_of_sets, list_of_parameters, variables):
+def get_solver_results(model, objectives_input, parameters_input, list_of_sets, list_of_parameters, variables, settings):
     objectives_input_ordered = objectives_input.sort_values(by='Priority')
     priority_list = objectives_input_ordered['Priority'].unique()
     base_model = model
@@ -37,8 +40,8 @@ def get_solver_results(model, objectives_input, parameters_input, list_of_sets, 
     
     # Create solver
     solver = pulp.PULP_CBC_CMD(
-        timeLimit=parameters_input['Max Run Time'][1],
-        gapRel=parameters_input['Gap Limit'][1]
+        timeLimit=settings.solver.max_run_time,
+        gapRel=settings.solver.gap_limit
     )
     
     for x in priority_list:
@@ -66,15 +69,18 @@ def get_solver_results(model, objectives_input, parameters_input, list_of_sets, 
             
     return result
 
-def run_solver(input_values):
+def run_solver(input_values, settings):
     start_time = datetime.now()
-    big_m = 999999999
+    big_m = settings.network.big_m
     
     # Split all * scenarios
     input_values = DataPreprocessor.split_scenarios(input_values)
     
     # Inputs independent of scenario
     parameters_input = input_values['parameters_input']
+    settings.solver.max_run_time = parameters_input['Max Run Time'][1]
+    settings.solver.gap_limit = parameters_input['Gap Limit'][1]
+
     objectives_input = input_values['objectives_input']
     periods_input = input_values['periods_input']
     products_input = input_values['products_input']
@@ -570,7 +576,6 @@ def run_solver(input_values):
         operating_costs_by_origin = variables['operating_costs_by_origin']
         total_operating_costs = variables['total_operating_costs']
         grand_total_operating_costs = variables['grand_total_operating_costs']
-        
         t_capacity_option_cost = variables['t_capacity_option_cost']
         t_capacity_option_cost_by_location_type = variables['t_capacity_option_cost_by_location_type']
         t_capacity_option_cost_by_period_type = variables['t_capacity_option_cost_by_period_type']
@@ -733,157 +738,149 @@ def run_solver(input_values):
             expr = ( departed_product[n,n2,p,t] <=max_value )
             model += expr, f"node_type_constraints_{n}_{n2}_{p}_{t}"
 
-        for t,p,n,g in product( PERIODS,PRODUCTS,NODES, NODEGROUPS):
-             max_dropped_expr = (max_dropped.get((t, p, n,g),big_m) >=dropped_demand[n, p, t])
-             model += max_dropped_expr, f"Max_Dropped_{t}_{p}_{n}_{g}"
-        for p,n,g	in product(	PRODUCTS,NODES, NODEGROUPS):
-             max_dropped_expr = (max_dropped.get(('@', p, n,g),big_m) >=pulp.lpSum(dropped_demand[n, p, t] for	t	in PERIODS))
-             model += max_dropped_expr, f"Max_Dropped_{p}_{n}_{g}"
-        for t,n,g	in product(	PERIODS,NODES, NODEGROUPS):
-             max_dropped_expr = (max_dropped.get((t, '@', n,g),big_m) >=pulp.lpSum(dropped_demand[n, p, t] for	p in PRODUCTS))
-             model += max_dropped_expr, f"Max_Dropped_{t}_{n}_{g}"
-        for t,p,g	in product(	PERIODS,PRODUCTS, NODEGROUPS):
-             max_dropped_expr = (max_dropped.get((t, p, '@',g),big_m) >=pulp.lpSum(dropped_demand[n, p, t] for	n	in NODES))
-             model += max_dropped_expr, f"Max_Dropped_{t}_{p}_{g}"
-        for p,g	in product(PRODUCTS, NODEGROUPS):
-             max_dropped_expr = (max_dropped.get(('@', p, '@',g),big_m) >=pulp.lpSum(dropped_demand[n, p, t]  for	t, n	in product(	PERIODS,NODES)))
-             model += max_dropped_expr, f"Max_Dropped_{p}_{g}"
-        for n,g	in product(NODES, NODEGROUPS):
-             max_dropped_expr = (max_dropped.get(('@', '@', n,g),big_m) >=pulp.lpSum(dropped_demand[n, p, t]  for	p, t in product(	PRODUCTS,PERIODS)))
-             model += max_dropped_expr, f"Max_Dropped_{n}_{g}"
-        for t,g	in 	product(PERIODS, NODEGROUPS):
-             max_dropped_expr = (max_dropped.get((t, '@', '@',g),big_m) >=pulp.lpSum(dropped_demand[n, p, t]  for	n, p in product(	NODES,PRODUCTS)))
-             model += max_dropped_expr, f"Max_Dropped_{t}_{g}"
-        for g	in 	NODEGROUPS:
-            max_dropped_expr = (max_dropped.get(('@', '@', '@',g),big_m) >=pulp.lpSum(dropped_demand[n, p, t]  for	t, n, p in product(	PERIODS,NODES,PRODUCTS)))
-            model += max_dropped_expr, f"Max_Dropped_All_{g}"
+        # Initialize aggregation symbols
+        periods = list(PERIODS) + ['@']
+        products = list(PRODUCTS) + ['@']
+        nodes = list(NODES) + ['@']
+        measures = list(MEASURES) + ['@']
+        receiving_nodes = list(RECEIVING_NODES) + ['@']
+        departing_nodes = list(DEPARTING_NODES) + ['@']
 
-        for t,p,n_r,g in product( PERIODS,PRODUCTS,RECEIVING_NODES, NODEGROUPS):
-             max_ib_carried_expr = (ib_max_carried.get((t, p, n_r,g),big_m) >=ib_carried_over_demand[n_r, p, t])
-             model += max_ib_carried_expr, f"IB_Max_Carried_{t}_{p}_{n_r}_{g}"
-        for p,n_r,g in product( PRODUCTS,RECEIVING_NODES, NODEGROUPS):
-             max_ib_carried_expr = (ib_max_carried.get(('@', p, n_r,g),big_m) >=pulp.lpSum(ib_carried_over_demand[n_r, p, t] for t  in PERIODS))
-             model += max_ib_carried_expr, f"IB_Max_Carried_{p}_{n_r}_{g}"
-        for t,n_r,g in product( PERIODS,RECEIVING_NODES, NODEGROUPS):
-             max_ib_carried_expr = (ib_max_carried.get((t, '@', n_r,g),big_m) >=pulp.lpSum(ib_carried_over_demand[n_r, p, t] for p in PRODUCTS))
-             model += max_ib_carried_expr, f"IB_Max_Carried_{t}_{n_r}_{g}"
-        for t,p,g in product( PERIODS,PRODUCTS, NODEGROUPS):
-             max_ib_carried_expr = (ib_max_carried.get((t, p, '@',g),big_m) >=pulp.lpSum(ib_carried_over_demand[n_r, p, t] for n_r  in RECEIVING_NODES))
-             model += max_ib_carried_expr, f"IB_Max_Carried_{t}_{p}_{g}"
-        for p,g in product(PRODUCTS, NODEGROUPS):
-             max_ib_carried_expr = (ib_max_carried.get(('@', p, '@',g),big_m) >=pulp.lpSum(ib_carried_over_demand[n_r, p, t] for t, n_r in product( PERIODS,RECEIVING_NODES)))
-             model += max_ib_carried_expr, f"IB_Max_Carried_{p}_{g}"
-        for n_r,g in product(RECEIVING_NODES, NODEGROUPS):
-             max_ib_carried_expr = (ib_max_carried.get(('@', '@', n_r,g),big_m) >=pulp.lpSum(ib_carried_over_demand[n_r, p, t] for p, t in product(PRODUCTS,PERIODS)))
-             model += max_ib_carried_expr, f"IB_Max_Carried_{n_r}_{g}"
-        for t,g in product(PERIODS, NODEGROUPS):
-             max_ib_carried_expr = (ib_max_carried.get((t, '@', '@',g),big_m) >=pulp.lpSum(ib_carried_over_demand[n_r, p, t] for n_r, p in product(RECEIVING_NODES,PRODUCTS)))
-             model += max_ib_carried_expr, f"IB_Max_Carried_{t}_{g}"
-        for g	in 	NODEGROUPS:
-            max_ib_carried_expr = (ib_max_carried.get(('@', '@', '@',g),big_m) >=pulp.lpSum(ib_carried_over_demand[n_r, p, t] for t, n_r, p in product( PERIODS,RECEIVING_NODES,PRODUCTS)))
-            model += max_ib_carried_expr, f"IB_Max_Carried_All_{g}"
+        # Handle dropped demand constraints
+        for n_index in nodes:
+            for g_index in NODEGROUPS:
+                if n_index == '@' or node_in_nodegroup.get((n_index, g_index), 0) == 1:
+                    nodes_list = NODES if n_index == '@' else [n_index]
+                    
+                    for t_index in periods:
+                        periods_list = PERIODS if t_index == '@' else [t_index]
+                        
+                        for p_index in products:
+                            products_list = PRODUCTS if p_index == '@' else [p_index]
+                            
+                            # Calculate dropped demand expression
+                            right_exp = pulp.lpSum(dropped_demand[n, p, t] 
+                                                for n in nodes_list 
+                                                for p in products_list 
+                                                for t in periods_list)
+                            
+                            max_dropped_expr = (max_dropped.get((t_index, p_index, n_index, g_index), big_m) >= right_exp)
+                            model += max_dropped_expr, f"Max_Dropped_{t_index}_{p_index}_{n_index}_{g_index}"
 
-        for t,p,n_d,g in product( PERIODS,PRODUCTS,DEPARTING_NODES, NODEGROUPS):
-             max_ob_carried_expr = (ob_max_carried.get((t, p, n_d,g),big_m) >=ob_carried_over_demand[n_d, p, t])
-             model += max_ob_carried_expr, f"OB_Max_Carried_{t}_{p}_{n_d}_{g}"
-        for p,n_d,g in product( PRODUCTS,DEPARTING_NODES, NODEGROUPS):
-             max_ob_carried_expr = (ob_max_carried.get(('@', p, n_d,g),big_m) >=pulp.lpSum(ob_carried_over_demand[n_d, p, t] for t in PERIODS))
-             model += max_ob_carried_expr, f"OB_Max_Carried_{p}_{n_d}_{g}"
-        for t,n_d,g in product( PERIODS,DEPARTING_NODES, NODEGROUPS):
-             max_ob_carried_expr = (ob_max_carried.get((t, '@', n_d,g),big_m) >=pulp.lpSum(ob_carried_over_demand[n_d, p, t] for p in PRODUCTS))
-             model += max_ob_carried_expr, f"OB_Max_Carried_{t}_{n_d}_{g}"
-        for t,p,g in product( PERIODS,PRODUCTS, NODEGROUPS):
-             max_ob_carried_expr = (ob_max_carried.get((t, p, '@',g),big_m) >=pulp.lpSum(ob_carried_over_demand[n_d, p, t] for n_d in DEPARTING_NODES))
-             model += max_ob_carried_expr, f"OB_Max_Carried_{t}_{p}_{g}"
-        for p,g in product(PRODUCTS, NODEGROUPS):
-             max_ob_carried_expr = (ob_max_carried.get(('@', p, '@',g),big_m) >=pulp.lpSum(ob_carried_over_demand[n_d, p, t] for t, n_d in product( PERIODS,DEPARTING_NODES)))
-             model += max_ob_carried_expr, f"OB_Max_Carried_{p}_{g}"
-        for n_d,g in product(DEPARTING_NODES, NODEGROUPS):
-             max_ob_carried_expr = (ob_max_carried.get(('@', '@', n_d,g),big_m) >=pulp.lpSum(ob_carried_over_demand[n_d, p, t] for p, t in product(PRODUCTS,PERIODS)))
-             model += max_ob_carried_expr, f"OB_Max_Carried_{n_d}_{g}"
-        for t,g in product(PERIODS, NODEGROUPS):
-             max_ob_carried_expr = (ob_max_carried.get((t, '@', '@',g),big_m) >=pulp.lpSum(ob_carried_over_demand[n_d, p, t] for n_d, p in product(DEPARTING_NODES,PRODUCTS)))
-             model += max_ob_carried_expr, f"OB_Max_Carried_{t}_{g}"
-        for g	in 	NODEGROUPS:
-            max_ob_carried_expr = (ob_max_carried.get(('@', '@', '@',g),big_m) >=pulp.lpSum(ob_carried_over_demand[n_d, p, t] for t, n_d, p in product( PERIODS,DEPARTING_NODES,PRODUCTS)))
-            model += max_ob_carried_expr, f"OB_Max_Carried_All_{g}"
-        
-        logging.info(f"Added max carried and dropped constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")		
-
-        # ib_carried_over_demand * products_measures is less than or equal to ib_carrying_capacity + use_carrying capacity option
-        for t,n_r,u,g	in product(	PERIODS,RECEIVING_NODES,MEASURES, NODEGROUPS	):
-             ib_carrying_capacity_expr = (ib_carrying_capacity.get((	t,n_r,u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2 in product(	C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for p in PRODUCTS))
-             model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_{t}_{n_r}_{u}_{g}"
-        for n_r,u,g	in product(RECEIVING_NODES,MEASURES, NODEGROUPS	):
-             ib_carrying_capacity_expr = (ib_carrying_capacity.get((	'@',n_r,u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2 in product(	C_CAPACITY_EXPANSIONS , PERIODS	) )
-                                                                                      >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for p,t in product(PRODUCTS,PERIODS)))
-             model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_{n_r}_{u}_{g}"
-        for t,u,g	in product(	PERIODS,MEASURES, NODEGROUPS	):
-             ib_carrying_capacity_expr = (ib_carrying_capacity.get((	t,'@',u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(RECEIVING_NODES,	C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for n_r,p in product(RECEIVING_NODES, PRODUCTS)))
-             model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_{t}_{u}_{g}"
-        for t,n_r,g	in product(	PERIODS,RECEIVING_NODES, NODEGROUPS	):
-             ib_carrying_capacity_expr = (ib_carrying_capacity.get((	t,n_r,'@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2 in product(	C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for p in PRODUCTS))
-             model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_{t}_{n_r}_{g}"
-        for u,g	in 	product(MEASURES, NODEGROUPS)	:
-             ib_carrying_capacity_expr = (ib_carrying_capacity.get((	'@','@',u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(RECEIVING_NODES,	C_CAPACITY_EXPANSIONS , PERIODS	) )
-                                                                                      >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for t,n_r,p in product(PERIODS,RECEIVING_NODES,PRODUCTS)))
-             model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_{u}_{g}"
-        for n_r,g	in product(RECEIVING_NODES, NODEGROUPS):
-             ib_carrying_capacity_expr = (ib_carrying_capacity.get((	'@',n_r,'@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2, u in product(	C_CAPACITY_EXPANSIONS , PERIODS, MEASURES	) )
-                                                                                      >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for t,p,u in product(PERIODS,PRODUCTS,MEASURES)))
-             model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_{n_r}_{g}"
-        for t,g	in 	product(PERIODS, NODEGROUPS):
-             ib_carrying_capacity_expr = (ib_carrying_capacity.get((	t,'@','@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(	RECEIVING_NODES,C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for n_r,p,u in product(RECEIVING_NODES,PRODUCTS,MEASURES)))
-             model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_{t}_{g}"
-        for g in NODEGROUPS:    
-            ib_carrying_capacity_expr = (ib_carrying_capacity.get((	'@','@','@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ib_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(	RECEIVING_NODES,C_CAPACITY_EXPANSIONS , PERIODS	) )
-                                                                                    >=pulp.lpSum(ib_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for t,n_r,p,u in product(PERIODS,RECEIVING_NODES,PRODUCTS,MEASURES)))
-            model += ib_carrying_capacity_expr, f"IB_CarryingCapacity_All_{g}"
-
-        logging.info(f"Added inbound carrying capacity constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        # ob_carried_over_demand * products_measures is less than or equal to ob_carrying_capacity + use_carrying capacity option
-        for t,n_r,u,g	in product(	PERIODS,DEPARTING_NODES,MEASURES, NODEGROUPS	):
-             ob_carrying_capacity_expr = (ob_carrying_capacity.get((	t,n_r,u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2 in product(	C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for p in PRODUCTS))
-             model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_{t}_{n_r}_{u}_{g}"
-        for n_r,u,g	in product(DEPARTING_NODES,MEASURES, NODEGROUPS	):
-             ob_carrying_capacity_expr = (ob_carrying_capacity.get((	'@',n_r,u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2 in product(	C_CAPACITY_EXPANSIONS , PERIODS	) )
-                                                                                      >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for p,t in product(PRODUCTS,PERIODS)))
-             model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_{n_r}_{u}_{g}"
-        for t,u,g in product(	PERIODS,MEASURES, NODEGROUPS	):
-             ob_carrying_capacity_expr = (ob_carrying_capacity.get((	t,'@',u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(DEPARTING_NODES,	C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for n_r,p in product(DEPARTING_NODES, PRODUCTS)))
-             model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_{t}_{u}_{g}"
-        for t,n_r,g	in product(	PERIODS,DEPARTING_NODES, NODEGROUPS	):
-             ob_carrying_capacity_expr = (ob_carrying_capacity.get((	t,n_r,'@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2 in product(	C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for p in PRODUCTS))
-             model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_{t}_{n_r}_{g}"
-        for u,g	in 	product(MEASURES, NODEGROUPS)	:
-             ob_carrying_capacity_expr = (ob_carrying_capacity.get((	'@','@',u,g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(DEPARTING_NODES,	C_CAPACITY_EXPANSIONS , PERIODS	) )
-                                                                                      >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for t,n_r,p in product(PERIODS,DEPARTING_NODES,PRODUCTS)))
-             model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_{u}_{g}"
-        for n_r,g	in product(DEPARTING_NODES, NODEGROUPS):
-             ob_carrying_capacity_expr = (ob_carrying_capacity.get((	'@',n_r,'@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for e_c, t2, u in product(	C_CAPACITY_EXPANSIONS , PERIODS, MEASURES	) )
-                                                                                      >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for t,p,u in product(PERIODS,PRODUCTS,MEASURES)))
-             model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_{n_r}_{g}"
-        for t,g	in 	product(PERIODS, NODEGROUPS):
-             ob_carrying_capacity_expr = (ob_carrying_capacity.get((	t,'@','@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(	DEPARTING_NODES,C_CAPACITY_EXPANSIONS , PERIODS	) if int(t2)<=int(t))
-                                                                                      >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for n_r,p,u in product(DEPARTING_NODES,PRODUCTS,MEASURES)))
-             model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_{t}_{g}"
-        for g in NODEGROUPS:         
-            ob_carrying_capacity_expr = (ob_carrying_capacity.get((	'@','@','@',g	),big_m) +pulp.lpSum(use_carrying_capacity_option[n_r,e_c,t2]*ob_carrying_expansion_capacity.get((t2,n_r,e_c),0) for n_r, e_c, t2 in product(	DEPARTING_NODES,C_CAPACITY_EXPANSIONS , PERIODS	) )
-                                                                                    >=pulp.lpSum(ob_carried_over_demand[n_r,p,t]*products_measures.get((p,u),0) for t,n_r,p,u in product(PERIODS,DEPARTING_NODES,PRODUCTS,MEASURES)))
-            model += ob_carrying_capacity_expr, f"OB_CarryingCapacity_All_{g}"
-
-        logging.info(f"Added outbound carrying capacity constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
+        # Handle inbound carried demand constraints
+        for n_index in receiving_nodes:
+            for g_index in NODEGROUPS:
+                if n_index == '@' or node_in_nodegroup.get((n_index, g_index), 0) == 1:
+                    nodes_list = RECEIVING_NODES if n_index == '@' else [n_index]
+                    for t_index in periods:
+                        periods_list = PERIODS if t_index == '@' else [t_index]
+                        for p_index in products:
+                            products_list = PRODUCTS if p_index == '@' else [p_index]
+                            # Calculate inbound carried demand expression
+                            right_exp = pulp.lpSum(ib_carried_over_demand[n, p, t] 
+                                                for n in nodes_list 
+                                                for p in products_list 
+                                                for t in periods_list)
+                            max_ib_carried_expr = (ib_max_carried.get((t_index, p_index, n_index, g_index), big_m) >= right_exp)
+                            model += max_ib_carried_expr, f"IB_Max_Carried_{t_index}_{p_index}_{n_index}_{g_index}"
 
 
-        
+        # Handle outbound carried demand constraints
+        for n_index in departing_nodes:
+            for g_index in NODEGROUPS:
+                if n_index == '@' or node_in_nodegroup.get((n_index, g_index), 0) == 1:
+                    nodes_list = DEPARTING_NODES if n_index == '@' else [n_index]
+                    
+                    for t_index in periods:
+                        periods_list = PERIODS if t_index == '@' else [t_index]
+                        
+                        for p_index in products:
+                            products_list = PRODUCTS if p_index == '@' else [p_index]
+                            
+                            # Calculate outbound carried demand expression
+                            right_exp = pulp.lpSum(ob_carried_over_demand[n, p, t] 
+                                                for n in nodes_list 
+                                                for p in products_list 
+                                                for t in periods_list)
+                            
+                            max_ob_carried_expr = (ob_max_carried.get((t_index, p_index, n_index, g_index), big_m) >= right_exp)
+                            model += max_ob_carried_expr, f"OB_Max_Carried_{t_index}_{p_index}_{n_index}_{g_index}"
+
+
+        # Handle inbound carrying capacity constraints
+        for n_index in receiving_nodes:
+            for g_index in NODEGROUPS:
+                if n_index == '@' or node_in_nodegroup.get((n_index, g_index), 0) == 1:
+                    nodes_list = RECEIVING_NODES if n_index == '@' else [n_index]
+                    
+                    for t_index in periods:
+                        periods_list = PERIODS if t_index == '@' else [t_index]
+                        
+                        for u_index in measures:
+                            measures_list = MEASURES if u_index == '@' else [u_index]
+                            
+                            # Calculate expansion capacity sum
+                            expansion_sum = pulp.lpSum(
+                                use_carrying_capacity_option[n, e_c, t2] * 
+                                ib_carrying_expansion_capacity.get((t2, n, e_c), 0)
+                                for n in nodes_list 
+                                for e_c in C_CAPACITY_EXPANSIONS
+                                for t2 in periods_list if t_index == '@' or int(t2) <= int(t_index)
+                            )
+                            
+                            # Calculate carried demand sum
+                            demand_sum = pulp.lpSum(
+                                ib_carried_over_demand[n, p, t] * products_measures.get((p, u), 0)
+                                for n in nodes_list
+                                for p in PRODUCTS
+                                for t in periods_list
+                                for u in measures_list
+                            )
+                            
+                            capacity_expr = (
+                                ib_carrying_capacity.get((t_index, n_index, u_index, g_index), big_m) + 
+                                expansion_sum >= demand_sum
+                            )
+                            model += capacity_expr, f"IB_CarryingCapacity_{t_index}_{n_index}_{u_index}_{g_index}"
+
+
+        # Handle outbound carrying capacity constraints
+        for n_index in departing_nodes:
+            for g_index in NODEGROUPS:
+                if n_index == '@' or node_in_nodegroup.get((n_index, g_index), 0) == 1:
+                    nodes_list = DEPARTING_NODES if n_index == '@' else [n_index]
+                    
+                    for t_index in periods:
+                        periods_list = PERIODS if t_index == '@' else [t_index]
+                        
+                        for u_index in measures:
+                            measures_list = MEASURES if u_index == '@' else [u_index]
+                            
+                            # Calculate expansion capacity sum for outbound
+                            expansion_sum = pulp.lpSum(
+                                use_carrying_capacity_option[n, e_c, t2] * 
+                                ob_carrying_expansion_capacity.get((t2, n, e_c), 0)
+                                for n in nodes_list 
+                                for e_c in C_CAPACITY_EXPANSIONS
+                                for t2 in periods_list if t_index == '@' or int(t2) <= int(t_index)
+                            )
+                            
+                            # Calculate carried demand sum for outbound
+                            demand_sum = pulp.lpSum(
+                                ob_carried_over_demand[n, p, t] * products_measures.get((p, u), 0)
+                                for n in nodes_list
+                                for p in PRODUCTS
+                                for t in periods_list
+                                for u in measures_list
+                            )
+                            
+                            capacity_expr = (
+                                ob_carrying_capacity.get((t_index, n_index, u_index, g_index), big_m) + 
+                                expansion_sum >= demand_sum
+                            )
+                            model += capacity_expr, f"OB_CarryingCapacity_{t_index}_{n_index}_{u_index}_{g_index}"
+
+
         # Adhere to min and max flow constraints - units
         periods = list(PERIODS) + ['@']
         departing_nodes = list(DEPARTING_NODES) + ['@']
@@ -1622,93 +1619,10 @@ def run_solver(input_values):
                     model.addConstraint(expr, f"Utilization_constraint_{r}_{n}_{t}_{c}_{g}")
             logging.info(f"Added procesing less than processing capacity constraint: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-
-
-
-        for n_r, p, t, a in product(RECEIVING_NODES, PRODUCTS, PERIODS, AGES):
-            expr = (vol_arrived_by_age[n_r, p, t, a]== pulp.lpSum( vol_departed_by_age[n_d,n_r, p, t2, a,m]  for n_d in DEPARTING_NODES for m in MODES for t2 in PERIODS if  int(t2)==int(t)-int(transport_periods.get((n_d,n_r,m),0))))
-            model.addConstraint(expr, f"Age_receiving_departure_equality_constraint_{n_r}_{p}_{t}_{a}")
-
-        for n_r, p, t in product(RECEIVING_NODES, PRODUCTS, PERIODS):
-            expr = ( pulp.lpSum(vol_arrived_by_age[n_r, p, t, a] for a in AGES) == arrived_product[n_r, p, t])
-            model.addConstraint(expr, f"Age_receiving_equals_arrived_volume_constraint_{n_r}_{p}_{t}")
-        for n, p, t in product(NODES, PRODUCTS, PERIODS):
-            expr = ( pulp.lpSum(vol_processed_by_age[n, p, t, a] for a in AGES) == processed_product[n, p, t])
-            model.addConstraint(expr, f"Age_processed_equals_processed_volume_constraint_{n}_{p}_{t}")
-        for n, p, t in product(RECEIVING_NODES, PRODUCTS, PERIODS):
-            expr = ( pulp.lpSum(vol_dropped_by_age[n, p, t, a] for a in AGES) == dropped_demand[n, p, t])
-            model.addConstraint(expr, f"Age_dropped_equals_dropped_volume_constraint_{n}_{p}_{t}")
-        for n, p, t in product(RECEIVING_NODES, PRODUCTS, PERIODS):
-            expr = ( pulp.lpSum(demand_by_age[n, p, t, a] for a in AGES) == arrived_and_completed_product[t, p, n])
-            model.addConstraint(expr, f"Age_demand_equals_demand_volume_constraint_{n}_{p}_{t}")
-        for n_d, n_r, p, t, m in product(DEPARTING_NODES,RECEIVING_NODES, PRODUCTS, PERIODS, MODES):
-            expr = ( pulp.lpSum(vol_departed_by_age[n_d, n_r, p, t, a,m] for a in AGES) == departed_product_by_mode[n_d, n_r, p, t,m])
-            model.addConstraint(expr, f"Age_departing_equals_departed_volume_constraint_{n_d}_{n_r}_{p}_{t}")
-        for n_r, p, t in product(RECEIVING_NODES, PRODUCTS, PERIODS):
-            expr = ( pulp.lpSum(ib_vol_carried_over_by_age[n_r, p, t, a] for a in AGES) == ib_carried_over_demand[n_r, p, t] )
-            model.addConstraint(expr, f"Age_ib_carried_over_equals_ib_carried_over_constraint_{n_r}_{p}_{t}")
-        for n_d, p, t in product(DEPARTING_NODES, PRODUCTS, PERIODS):
-            expr = ( pulp.lpSum(ob_vol_carried_over_by_age[n_d, p, t, a] for a in AGES) == ob_carried_over_demand[n_d, p, t])
-            model.addConstraint(expr, f"Age_ob_carried_over_equals_ob_carried_over_constraint_{n_d}_{p}_{t}")
-        
-        #processed volume by age relative to inbound volume
-        for n, p, t, a, g in product(RECEIVING_NODES, PRODUCTS, PERIODS, AGES, NODEGROUPS):
-            if node_in_nodegroup.get((n,g),0)==1:
-                if n not in ORIGINS:
-                    if int(t)>1 and int(a)>0:
-                        expr = ( vol_processed_by_age[n, p, t, a]<=vol_arrived_by_age[n, p, t, a]+ib_vol_carried_over_by_age[n, p, str(int(t)-1), str(int(a)-1)]-vol_dropped_by_age[n, p, t, a]-demand_by_age[n, p, t, a]-ib_vol_carried_over_by_age[n, p, t, a])
-                    else:
-                        expr = (vol_processed_by_age[n, p, t, a]<=vol_arrived_by_age[n, p, t, a]-vol_dropped_by_age[n, p, t, a]-demand_by_age[n, p, t, a]-ib_vol_carried_over_by_age[n, p, t, a])
-                else:
-                        expr = pulp.lpSum(vol_processed_by_age[n, p, t, a] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n,p,g),0))-int(capacity_consumption_periods.get((t2,n,p,g),0)))>=(demand_by_age[n, p, t, a]-vol_dropped_by_age[n, p, t, a])
-                model.addConstraint(expr, f"processed_by_age_less_than_arrived_carried_over_constraint_{n}_{p}_{t}_{a}_{g}")
-
-        for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES):
-            expr = ( vol_processed_by_age[n, p, t, a]<=processed_product[n, p, t]-pulp.lpSum(vol_processed_by_age[n, p, t, a2] for a2 in AGES if int(a2)>int(a)))
-            model.addConstraint(expr, f"processed_by_age_fifo_constraint_{n}_{p}_{t}_{a}")
-        
-        #departed by age
-        for n_d, p, t, a, g in product(DEPARTING_NODES, PRODUCTS, PERIODS, AGES, NODEGROUPS):
-            if node_in_nodegroup.get((n_d,g),0)==1:
-                if n_d not in ORIGINS:
-                    if int(t)>1 and int(a)>0:
-                        expr = (pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a, m] for n_r in RECEIVING_NODES for m in MODES)+ob_vol_carried_over_by_age[n_d, p, t, a]<=ob_vol_carried_over_by_age[n_d, p, str(int(t)-1), str(int(a)-1)] + pulp.lpSum(vol_processed_by_age[n_d, p, t2, a]  for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p,g),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0))))
-                    else:
-                        expr =(pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a, m] for n_r in RECEIVING_NODES for m in MODES)+ob_vol_carried_over_by_age[n_d, p, t, a]<=pulp.lpSum(vol_processed_by_age[n_d, p, t2, a]  for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p,g),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0))))
-                else:
-                    if int(t)>1 and int(a)>0:
-                        expr = (pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a, m] for n_r in RECEIVING_NODES for m in MODES)+ob_vol_carried_over_by_age[n_d, p, t, a]<=ob_vol_carried_over_by_age[n_d, p, str(int(t)-1), str(int(a)-1)]+ pulp.lpSum(vol_processed_by_age[n_d, p, t2, a]  for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p,g),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0)))-demand_by_age[n_d, p, t, a])
-                    else:
-                        expr =(pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a, m] for n_r in RECEIVING_NODES for m in MODES)+ob_vol_carried_over_by_age[n_d, p, t, a]<= pulp.lpSum(vol_processed_by_age[n_d, p, t2, a]  for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p,g),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0)))-demand_by_age[n_d, p, t, a])
-                model.addConstraint(expr, f"departed_by_age_less_than_processed_carried_over_constraint_{n_d}_{p}_{t}_{a}_{g}")
-
-        for n, p, t, a in product(NODES, PRODUCTS, PERIODS, AGES):
-            expr = (vol_dropped_by_age[n, p, t, a]<=dropped_demand[n, p, t]-pulp.lpSum(vol_dropped_by_age[n, p, t, a2] for a2 in AGES if int(a2)>int(a)))
-            model.addConstraint(expr, f"dropped_by_age_fifo_constraint_{n}_{p}_{t}_{a}")
-
         for n_d, p, t, a, m in product(DEPARTING_NODES, PRODUCTS, PERIODS, AGES,MODES):
             expr = ( pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a,m] for n_r in RECEIVING_NODES )<=pulp.lpSum(departed_product_by_mode[n_d, n_r, p, t,m] for n_r in RECEIVING_NODES)-pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a2,m] for n_r in RECEIVING_NODES for a2 in AGES if int(a2)>int(a)))
             model.addConstraint(expr, f"departed_by_age_fifo_constraint_{n_d}_{p}_{t}_{a}_{m}")
 
-        #age constraints
-        if max_vol_by_age:
-            for d, p, t , a, g in product(DESTINATIONS, PRODUCTS, PERIODS, AGES, NODEGROUPS):
-                if node_in_nodegroup.get((d,g),0)==1:
-                    expr = ( demand_by_age[d, p, t, a]<=max_vol_by_age.get((t,p,d,a,g),big_m) )
-                    model.addConstraint(expr, f"max_volume_by_age_constraint_{d}_{p}_{t}_{a}_{g}")
-
-         #age constraint violation
-        if max_vol_by_age and age_constraint_violation_cost:
-            for d, p, t , a, g in product(DESTINATIONS, PRODUCTS, PERIODS, AGES, NODEGROUPS):
-                if node_in_nodegroup.get((d,g),0)==1:
-                    expr = ( (demand_by_age[d, p, t, a]-max_vol_by_age.get((t,p,d,a,g),big_m))*age_constraint_violation_cost.get((t,p,d,a,g),big_m)<=age_violation_cost[d, p, t, a] )
-                    model.addConstraint(expr, f"max_volume_by_age_violation_cost_constraint_{d}_{p}_{t}_{a}_{g}")
-            
-        # grand_total_age_violation_cost = pulp.LpVariable("grand_total_age_violation_cost", lowBound=0, cat="Continuous")
-        expr = (grand_total_age_violation_cost == pulp.lpSum(age_violation_cost[d, p, t, a] for d in DESTINATIONS for p in PRODUCTS for t in PERIODS for a in AGES))
-        model.addConstraint(expr, f"grand_total_age_violation_cost_constraint")
-
-        logging.info(f"Added age constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
         for n,t,c in product(NODES, PERIODS, RESOURCE_CAPACITY_TYPES):
             expr = (max_capacity_utilization>=node_utilization[n,t,c])
@@ -1718,24 +1632,17 @@ def run_solver(input_values):
             expr = (max_transit_distance>= binary_product_destination_assignment[o, t, p, d] * distance.get((o,d,m),big_m))
             model.addConstraint(expr, f"max_transit_distance_constraint_{o}_{t}_{d}_{p}_{m}")
 
-        # is_age_received = pulp.LpVariable.dicts("is_age_received", AGES, cat="binary")
-        for a in AGES:
-            expr = (max_age >= is_age_received[a]*int(a))
-            model.addConstraint(expr, f"max_age_constraint_{a}")
-
-        # is age received constraint
-        for a in AGES:
-            expr = (pulp.lpSum(demand_by_age[d, p, t, a] for d in DESTINATIONS for p in PRODUCTS for t in PERIODS )<=is_age_received[a]*big_m )
-            model.addConstraint(expr, f"binary_is_age_received_constraint_{a}")
 
         # Create constraint handlers
         flow_constraints = FlowConstraints(variables, list_of_sets, list_of_parameters)
+        age_constraints = AgeConstraints(variables, list_of_sets, list_of_parameters)
 
         # Add constraints to model
         flow_constraints.build(model)
+        age_constraints.build(model)
 
         solve_start =datetime.now()
-        result = get_solver_results(model,objectives_input,parameters_input,list_of_sets,list_of_parameters,variables)
+        result = get_solver_results(model,objectives_input,parameters_input,list_of_sets,list_of_parameters,variables, settings)
         logging.info(f"Solver time: {round((datetime.now() - solve_start).seconds, 0)} seconds.")
 
         output_results={}
@@ -1764,22 +1671,35 @@ def run_solver(input_values):
         print(f"Total run time: {round((datetime.now() - start_time).seconds, 0)} seconds.")
     return(results)
 
-def optimize_network(file):
-     #log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
-    #  logFile = "./logs/optimize_network.log"
+def optimize_network(file: str, settings: Settings = None) -> Dict[str, Any]:
+    """Run network optimization
+    
+    Args:
+        file: Input file path
+        settings: Optional Settings object for configuration
+    
+    Returns:
+        Dictionary containing optimization results
+    """
+    #Use default settings if none provided
+    if settings is None:
+        settings = Settings()
+    
+    # Configure logging
+    app_log = logging.getLogger('root')
+    app_log.setLevel(settings.logging.log_level)
+    handler = RotatingFileHandler(
+        settings.logging.log_file,
+        maxBytes=settings.logging.max_file_size,
+        backupCount=settings.logging.backup_count
+    )
+    app_log.addHandler(handler)
 
-    #  my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024*1024, 
-    #                                 backupCount=2, encoding=None, delay=0)
-    #  my_handler.setFormatter(log_formatter)
-    #  my_handler.setLevel(logging.INFO)
+    # Read input data
+    input_values = read_input_file(file)
 
-     app_log = logging.getLogger('root')
-     app_log.setLevel(logging.INFO)
-
-     app_log.addHandler(logging.NullHandler())
-     input_values = read_input_file(file)
-     results = run_solver(input_values)
-     return(results)
+    results = run_solver(input_values, settings)
+    return(results)
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(__file__) 

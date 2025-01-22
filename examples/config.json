@@ -1,0 +1,24 @@
+{
+    "solver": {
+      "max_run_time": 7200,
+      "gap_limit": 0.005,
+      "solver_name": "CBC"
+    },
+    "network": {
+      "big_m": 999999999,
+      "allow_partial_shipments": true,
+      "enforce_direct_shipping": false,
+      "max_intermediate_stops": 3
+    },
+    "resources": {
+      "allow_fractional_resources": false,
+      "enforce_cohort_sizes": true,
+      "track_resource_attributes": true
+    },
+    "logging": {
+      "log_level": "INFO",
+      "log_file": "network_optimizer.log",
+      "max_file_size": 5242880,
+      "backup_count": 2
+    }
+  }
