@@ -599,19 +599,16 @@ class VariableCreator:
         """Create variables related to plan-over-plan changes"""
         variables = {}
         
-        # Plan-over-plan base variables
-        base_indices = ((t1, t2, p, o, d) for t1, t2, p, o, d in product(
-            self.network_sets['PERIODS'],
-            self.network_sets['PERIODS'],
-            self.network_sets['PRODUCTS'],
-            self.network_sets['DEPARTING_NODES'],
-            self.network_sets['RECEIVING_NODES']
-        ))
-        
         for var_name in ['pop_cost', 'volume_moved', 'num_destinations_moved']:
             variables[var_name] = pulp.LpVariable.dicts(
                 var_name,
-                base_indices,
+                ((t1, t2, p, o, d) for t1, t2, p, o, d in product(
+                self.network_sets['PERIODS'],
+                self.network_sets['PERIODS'],
+                self.network_sets['PRODUCTS'],
+                self.network_sets['DEPARTING_NODES'],
+                self.network_sets['RECEIVING_NODES']
+                )),
                 lowBound=0,
                 cat="Continuous"
             )

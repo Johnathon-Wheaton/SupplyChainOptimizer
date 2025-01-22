@@ -588,8 +588,6 @@ def run_solver(input_values):
         max_age = variables['max_age']
         is_age_received = variables['is_age_received']
 
-
-        
         logging.info(f"Added processed, assigned, and capacity option variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
         # Add constraints and print progress
