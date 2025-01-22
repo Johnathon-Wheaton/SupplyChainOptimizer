@@ -590,13 +590,6 @@ def run_solver(input_values):
 
         logging.info(f"Added processed, assigned, and capacity option variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-        # Add constraints and print progress
-        # for n_d, n_r, t, p in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, PRODUCTS):
-        #     constraint_expr = pulp.lpSum(departed_product_by_mode[n_d, n_r,p,t,m] for m in MODES)
-        #     model += (departed_product[n_d, n_r,p,t]  == constraint_expr)
-        # logging.info(f"Added constraint to aggregate departed volume by mode: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-
         #resources_assigned equals initial resources assigned, minus resources removed, plus resources added
         for r,n,t,g  in product(RESOURCES, NODES, PERIODS, NODEGROUPS):
             if node_in_nodegroup.get((n,g),0)==1:
@@ -709,82 +702,6 @@ def run_solver(input_values):
             model.addConstraint(expr, f"arrived_and_completed_product_at_least_demand_{n_r}_{t}_{p}")
         expr = (pulp.lpSum(arrived_and_completed_product[t, p, n_r] for t in PERIODS for p in PRODUCTS for n_r in RECEIVING_NODES) == total_arrived_and_completed_product)
         model.addConstraint(expr, f"total_arrived_and_completed_product_equals_demand")
-
-        # processed volume must be less than or equal to arrived and carried inbound volume
-        for n_r,t, g, c in product(RECEIVING_NODES,PERIODS, NODEGROUPS, RESOURCE_CAPACITY_TYPES):
-            if node_in_nodegroup.get((n_r,g),0)==1:
-                if n_r not in ORIGINS:
-                    if int(t)>1:
-                        expr = ( processed_product[n_r, p, t] +ib_carried_over_demand[n_r, p, t] <= arrived_product[n_r, p, t]+ ib_carried_over_demand[n_r, p, str(int(t)-1)]- dropped_demand[n_r, p, t]-arrived_and_completed_product[t, p, n_r])
-                        model.addConstraint(expr, f"Processed_Less_Than_Arrived_Constraint_{n_r}_{t}_{g}_{c}")
-                    else:
-                        #processed volume must be at least what was arrived unless it was demand
-                        expr = ( processed_product[n_r, p, t] +ib_carried_over_demand[n_r, p, t]  <= arrived_product[n_r, p, t]- dropped_demand[n_r, p, t]-arrived_and_completed_product[t, p, n_r])
-                        model.addConstraint(expr, f"Processed_Less_Than_Arrived_Constraint_{n_r}_{t}_{g}_{c}")
-                else:
-                    #if it's an origin, then it must process at least the demand unless some of the demand is dropped
-                    expr = ( pulp.lpSum(processed_product[n_d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_r,p,g),0))-int(capacity_consumption_periods.get((t2, n_r,p,g),0)))>= arrived_and_completed_product[t, p, n_r]-dropped_demand[n_r, p, t])
-                    model.addConstraint(expr, f"Processed_Less_Than_Arrived_Constraint_{n_r}_{t}_{g}_{c}")
-        logging.info(f"Added procesing less than arrived volume constraint: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        # departed volume must be less than or equal to processed and carried outbound volume 
-        for n_d,t,p,g in product(DEPARTING_NODES,PERIODS,PRODUCTS, NODEGROUPS):
-            if node_in_nodegroup.get((n_d,g),0)==1:
-                if n_d not in ORIGINS:  #non origins don't need to process demand
-                    if int(t)>1:
-                        expr = ( pulp.lpSum(departed_product[n_d,n_r,p,t] for n_r in RECEIVING_NODES) +ob_carried_over_demand[n_d,p,t]<= pulp.lpSum(processed_product[n_d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0)))+ ob_carried_over_demand[n_d,p,str(int(t)-1)]  )
-                        model.addConstraint(expr, f"Depart_Less_Than_Processed_Constraint_{n_d}_{t}_{p}_{g}")
-                    else:
-                        #departed volume from a node must be less than processed volume
-                        expr = ( pulp.lpSum(departed_product[n_d,n_r,p,t]for n_r in RECEIVING_NODES)  +ob_carried_over_demand[n_d,p,t] <= pulp.lpSum(processed_product[n_d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0))) )
-                        model.addConstraint(expr, f"Depart_Less_Than_Processed_Constraint_{n_d}_{t}_{p}_{g}")
-                elif  n_d in RECEIVING_NODES: #origins need to process demand
-                    if int(t)>1:
-                        expr = ( pulp.lpSum(departed_product[n_d,n_r,p,t] for n_r in RECEIVING_NODES) +ob_carried_over_demand[n_d,p,t]<= pulp.lpSum(processed_product[n_d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0)))+ ob_carried_over_demand[n_d,p,str(int(t)-1)] -arrived_and_completed_product[t, p, n_d] )
-                        model.addConstraint(expr, f"Depart_Less_Than_Processed_Constraint_{n_d}_{t}_{p}_{g}")
-                    else:
-                        #departed volume from a node must be less than processed volume
-                        expr = ( pulp.lpSum(departed_product[n_d,n_r,p,t]for n_r in RECEIVING_NODES)  +ob_carried_over_demand[n_d,p,t] <= pulp.lpSum(processed_product[n_d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0)))-arrived_and_completed_product[t, p, n_d] )
-                        model.addConstraint(expr, f"Depart_Less_Than_Processed_Constraint_{n_d}_{t}_{p}_{g}")
-                else: #origins need to process demand
-                    if int(t)>1:
-                        expr = ( pulp.lpSum(departed_product[n_d,n_r,p,t] for n_r in RECEIVING_NODES) +ob_carried_over_demand[n_d,p,t]<= pulp.lpSum(processed_product[n_d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0)))+ ob_carried_over_demand[n_d,p,str(int(t)-1)] )
-                        model.addConstraint(expr, f"Depart_Less_Than_Processed_Constraint_{n_d}_{t}_{p}_{g}")
-                    else:
-                        #departed volume from a node must be less than processed volume
-                        expr = ( pulp.lpSum(departed_product[n_d,n_r,p,t]for n_r in RECEIVING_NODES)  +ob_carried_over_demand[n_d,p,t] <= pulp.lpSum(processed_product[n_d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,n_d,p),0))-int(capacity_consumption_periods.get((t2,n_d,p,g),0))))
-                        model.addConstraint(expr, f"Depart_Less_Than_Processed_Constraint_{n_d}_{t}_{p}_{g}")
-        logging.info(f"Added departed less than processed volume constraint: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        # arrived volume equals sum of upstream departures
-        # for n_r,t,p in product(RECEIVING_NODES,PERIODS, PRODUCTS):
-        #     expr = ( arrived_product[n_r,p,t] == pulp.lpSum(departed_product_by_mode[n_d,n_r,p,t2,m] for n_d in DEPARTING_NODES for m in MODES for t2 in PERIODS if  int(t2)==int(t)-int(transport_periods.get((n_d,n_r,m),0))))
-        #     model.addConstraint(expr, f"Arrived_Equals_Departed_Constraint_{n_r}_{t}_{p}")
-        # logging.info(f"Added arrivals equals upstream departures: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        # other flow constraints
-        # destination nodes must all demand, unless it's an origin
-        for t,p,d,g in product(PERIODS,PRODUCTS, DESTINATIONS, NODEGROUPS):
-            if node_in_nodegroup.get((d,g),0)==1:
-                if d not in ORIGINS:
-                    if int(t)>1:
-                        demand_constraint_expr = (arrived_and_completed_product[t,p,d] <= arrived_product[d,p,t]- dropped_demand[d,p,t]-ib_carried_over_demand[d,p,t]-processed_product[d,p,t] + ib_carried_over_demand[n_r,p,str(int(t)-1)]) 
-                    else:
-                        #arrived volume minus processe must be at least demand (demand isn't processed at destination)
-                        demand_constraint_expr = (arrived_and_completed_product[t,p,d] <= arrived_product[d,p,t]- dropped_demand[d,p,t]-ib_carried_over_demand[d,p,t]-processed_product[d,p,t] )
-                else: 
-                    if int(t)>1:
-                        demand_constraint_expr = (arrived_and_completed_product[t,p,d]  + ob_carried_over_demand[d,p,t] +pulp.lpSum(departed_product[d,n_r,p,t] for n_r in RECEIVING_NODES)   <= pulp.lpSum(processed_product[d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,d,p,g),0))-int(capacity_consumption_periods.get((t2,d,p, g),0))) + ob_carried_over_demand[d,p,str(int(t)-1)]) 
-                    else:
-                        #origin nodes must process at least what demand is for themselves and what they depart
-                        demand_constraint_expr = (arrived_and_completed_product[t,p,d]  + ob_carried_over_demand[d,p,t] +pulp.lpSum(departed_product[d,n_r,p,t] for n_r in RECEIVING_NODES) <= pulp.lpSum(processed_product[d,p,t2] for t2 in PERIODS if int(t2)==int(t)-int(delay_periods.get((t2,d,p,g),0))-int(capacity_consumption_periods.get((t2,d,p, g),0)))  )
-                model += demand_constraint_expr, f"minimum_destination_demand_processed_{t}_{p}_{d}_{g}"	
-
-        # # origin nodes must process all demand (or drop)
-        for t,p in product(PERIODS,PRODUCTS):
-            demand_constraint_expr =  (pulp.lpSum(arrived_and_completed_product[t,p,d] for d in DESTINATIONS)  <= pulp.lpSum(processed_product[o,p,t2] for o,t2 in product(ORIGINS,PERIODS) if int(t2)<=int(t) ))
-            model += demand_constraint_expr, f"minimum_origin_demand_processed_{t}_{p}"
-        
         # processed volume assembly constraints
         for t, p1, p2, n in product(PERIODS, PRODUCTS, PRODUCTS, NODES):
             if node_in_nodegroup.get((n,g),0)==1:

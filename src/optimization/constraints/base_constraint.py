@@ -9,6 +9,7 @@ class BaseConstraint(ABC):
         self.variables = variables
         self.network_sets = network_sets
         self.parameters = parameters
+        self.big_m = 999999999
 
     @abstractmethod
     def build(self, model: pulp.LpProblem) -> None:
