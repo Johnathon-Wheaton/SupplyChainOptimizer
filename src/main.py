@@ -39,7 +39,7 @@ def get_solver_results(model, objectives_input, parameters_input, list_of_sets, 
     objective_handler = ObjectiveHandler(variables, list_of_sets, list_of_parameters)
     
     # Create solver
-    solver = pulp.PULP_CBC_CMD(
+    solver = pulp.HiGHS_CMD(path = settings.solver.solver_file_path,
         timeLimit=settings.solver.max_run_time,
         gapRel=settings.solver.gap_limit
     )
