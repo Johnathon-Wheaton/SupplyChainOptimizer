@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Set, Tuple
 from data.readers import ExcelReader
 from data.writers import ExcelWriter
 from models.network import Network
-from optimization.constraints import FlowConstraints, AgeConstraints
+from optimization.constraints import FlowConstraints, AgeConstraints, TransportationConstraints,  ResourceConstraints, CapacityConstraints
 from optimization.objectives.objective_handler import ObjectiveHandler
 from optimization.solvers import MILPSolver
 from data.preprocessors import DataPreprocessor
@@ -258,7 +258,7 @@ def run_solver(input_values, settings):
         filtered_dataframes['load_capacity_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['load_capacity_input'], 'Measure', MEASURES)
 
         # Create capacity hierarchy table
-        capacity_type_heirarchy_input = resource_capacity_types_input[~resource_capacity_types_input['Parent Capacity Type'].isna()]
+        filtered_dataframes['capacity_type_hierarchy_input'] = resource_capacity_types_input[~resource_capacity_types_input['Parent Capacity Type'].isna()]
 
         # Filling missing values for transportation_constraints_input
         filtered_dataframes['transportation_constraints_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['transportation_constraints_input'], 'Period', PERIODS)
@@ -405,7 +405,7 @@ def run_solver(input_values, settings):
         capacity_consumption_periods = list_of_parameters['capacity_consumption_periods']
         delay_periods = list_of_parameters['delay_periods']
         load_capacity = list_of_parameters['load_capacity']
-        capacity_type_heirarchy = list_of_parameters['capacity_type_heirarchy']
+        capacity_type_hierarchy = list_of_parameters['capacity_type_hierarchy']
         transportation_constraints_min = list_of_parameters['transportation_constraints_min']
         transportation_constraints_max = list_of_parameters['transportation_constraints_max']
         transportation_expansion_capacity = list_of_parameters['transportation_expansion_capacity']
@@ -465,8 +465,6 @@ def run_solver(input_values, settings):
         resource_max_to_remove = list_of_parameters['resource_max_to_remove']
         resource_min_to_add = list_of_parameters['resource_min_to_add']
         resource_max_to_add = list_of_parameters['resource_max_to_add']
-
-
        
         logging.info(f"Done formatting inputs. {round((datetime.now() - format_inputs_start).seconds, 0)} seconds.")
         compile_model_start = datetime.now()
@@ -593,111 +591,7 @@ def run_solver(input_values, settings):
         max_age = variables['max_age']
         is_age_received = variables['is_age_received']
 
-        logging.info(f"Added processed, assigned, and capacity option variables: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
-        #resources_assigned equals initial resources assigned, minus resources removed, plus resources added
-        for r,n,t,g  in product(RESOURCES, NODES, PERIODS, NODEGROUPS):
-            if node_in_nodegroup.get((n,g),0)==1:
-                if int(t)==1:
-                    expr = (resources_assigned[r,n,t] == resource_node_initial_count.get((n,r,g),0)+resources_added[r,n,t]-resources_removed[r,n,t])
-                    model.addConstraint(expr, f"initial_resources_assigned_{r}_{n}_{t}_{g}")
-                else:
-                    expr = (resources_assigned[r,n,t] == resources_assigned[r,n,str(int(t)-1)]+resources_added[r,n,t]-resources_removed[r,n,t])
-                    model.addConstraint(expr, f"resources_assigned_after_{r}_{n}_{t}_{g}")
-        for r,n,t  in product(RESOURCES, NODES, PERIODS):
-            if int(t)==1 and  resource_node_initial_count.get((n,r,'@'),None):
-                expr = (pulp.lpSum(resources_assigned[r,n,t]*node_in_nodegroup.get((n,g),0) for g in NODEGROUPS) == resource_node_initial_count.get((n,r,'@'),0)+pulp.lpSum(resources_added[r,n,t]*node_in_nodegroup.get((n,g),0)-resources_removed[r,n,t]*node_in_nodegroup.get((n,g),0) for g in NODEGROUPS))
-                model.addConstraint(expr, f"initial_resources_assigned_{r}_{n}_{t}")
-        for r,t,g  in product(RESOURCES, PERIODS, NODEGROUPS):
-            if int(t)==1 and resource_node_initial_count.get(('@',r,g),None):
-                expr = (pulp.lpSum(resources_assigned[r,n,t]*node_in_nodegroup.get((n,g),0) for n in NODES) == resource_node_initial_count.get(('@',r,g),0)+pulp.lpSum(resources_added[r,n,t]*node_in_nodegroup.get((n,g),0)-resources_removed[r,n,t]*node_in_nodegroup.get((n,g),0) for n in NODES))
-                model.addConstraint(expr, f"initial_resources_assigned_{r}_{t}_{g}")
-        for r,t  in product(RESOURCES, PERIODS):
-            if int(t)==1 and  resource_node_initial_count.get(('@',r,'@'),None):
-                expr = (pulp.lpSum(resources_assigned[r,n,t]*node_in_nodegroup.get((n,g),0) for n in NODES for g in NODEGROUPS) == resource_node_initial_count.get(('@',r,'@'),0)+pulp.lpSum(resources_added[r,n,t]*node_in_nodegroup.get((n,g),0)-resources_removed[r,n,t]*node_in_nodegroup.get((n,g),0) for n in NODES for g in NODEGROUPS))
-                model.addConstraint(expr, f"initial_resources_assigned_{r}_{t}")  
-        logging.info(f"Added constraint to aggregate departed volume by mode: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-        
-        resource_capacity_by_type_sum = {}
-        
-        #calculate capacity based on number of resources assigned
-        for r,t,n,c,g  in product(RESOURCES, PERIODS,NODES,RESOURCE_CAPACITY_TYPES,NODEGROUPS):
-            #if there is any product requiring capacity type c at node n in time period t
-            capacity_demand = 0
-            if c in RESOURCE_PARENT_CAPACITY_TYPES:
-                capacity_demand =  sum( resource_capacity_consumption.get((p, t, g, n, c2),0)*capacity_type_heirarchy.get((c2,c),0) for p in PRODUCTS for c2 in RESOURCE_CAPACITY_TYPES)
-            else:
-                capacity_demand = sum( resource_capacity_consumption.get((p, t, g, n, c),0) for p in PRODUCTS)
-            if node_in_nodegroup.get((n,g),0)==1  and capacity_demand>0 and resource_capacity_by_type.get((t,n,r,c,g),None) != None:
-                resource_capacity_by_type_sum[(t,n,c,g)] = resource_capacity_by_type_sum.get((t,n,c,g), 0) + resource_capacity_by_type.get((t,n,r,c,g),0)
-                expr = (resource_capacity[r,n,t,c] <= (resources_assigned[r,n,t])*(resource_capacity_by_type.get((t,n,r,c,g),0)))
-                model.addConstraint(expr, f"capacity_based_on_resources_assigned_{r}_{t}_{n}_{c}_{g}")
-
-        #resource attribute capacity consumption
-        for r,t,n,a in product(RESOURCES, PERIODS, NODES, RESOURCE_ATTRIBUTES):
-            if resource_attribute_consumption_per.get((t,r,a),0) != 0:
-                expr = (resource_attribute_consumption[r,t,n,a] == resources_assigned[r,n,t]*resource_attribute_consumption_per.get((t,r,a),0))
-                model.addConstraint(expr, f"resource_attribute_consumption_{r}_{t}_{n}_{a}")
-
-        #configure binary variables for adding/removing resources
-        for r,n,t in product(RESOURCES, NODES, PERIODS):
-            expr = (resources_added[r,n,t] <= resources_added_binary[r,n,t] * big_m)
-            model.addConstraint(expr, f"resource_added_binary_lb_{r}_{t}_{n}")
-            expr = (resources_added[r,n,t] >= resources_added_binary[r,n,t])
-            model.addConstraint(expr, f"resource_added_binary_ub_{r}_{t}_{n}")
-            expr = (resources_removed[r,n,t]<= resources_removed_binary[r,n,t] * big_m)
-            model.addConstraint(expr, f"resource_removed_binary_lb_{r}_{t}_{n}")
-            expr = (resources_removed[r,n,t] >= resources_removed_binary[r,n,t])
-            model.addConstraint(expr, f"resource_removed_binary_ub_{r}_{t}_{n}")
-
-        for r,n,t,g in product(RESOURCES, NODES, PERIODS, NODEGROUPS):
-            if node_in_nodegroup.get((n,g),0)==1:
-                expr = (resources_added[r,n,t] >= resource_cohorts_added[r,n,t]*resource_add_cohort_count.get((t,n,r,g),1))
-                model.addConstraint(expr, f"resources_added_{r}_{t}_{n}_{g}")
-                expr = (resources_removed[r,n,t] >= resource_cohorts_removed[r,n,t]*resource_remove_cohort_count.get((t,n,r,g),1))
-                model.addConstraint(expr, f"resources_removed_{r}_{t}_{n}_{g}")
-
-
-        for r,n,t,g in product(RESOURCES, NODES, PERIODS, NODEGROUPS):
-            if node_in_nodegroup.get((n,g),0)==1:
-                expr = (resource_add_cost[t,n,r] == resource_cohorts_added[r,n,t]*resource_add_cohort_count.get((t,n,r,g),1)*resource_fixed_add_cost.get((t,n,r,g),0))
-                model.addConstraint(expr, f"resources_added_cost_{r}_{t}_{n}_{g}")
-                expr = (resource_remove_cost[t,n,r] == resource_cohorts_removed[r,n,t]*resource_remove_cohort_count.get((t,n,r,g),1)*resource_fixed_remove_cost.get((t,n,r,g),0))
-                model.addConstraint(expr, f"resources_removed_cost_{r}_{t}_{n}_{g}")
-                expr = (resource_time_cost[t,n,r] >= resources_assigned[r,n,t]*resource_cost_per_time.get((t,n,r,g),0))
-                model.addConstraint(expr, f"resources_time_cost_{r}_{t}_{n}_{g}")
-        expr = (resource_grand_total_cost == pulp.lpSum((resource_add_cost[t,n,r]+resource_remove_cost[t,n,r]+resource_time_cost[t,n,r]) for t, n, r in product(PERIODS, NODES, RESOURCES)))
-        model.addConstraint(expr, f"resources_grand_total_cost")
-
         # Flow Constraints
-        # processed volume must be less than processing capacity
-        for n,t,c,g in product(NODES,PERIODS,RESOURCE_CAPACITY_TYPES, NODEGROUPS):
-            if node_in_nodegroup.get((n,g),0)==1:
-                if c in RESOURCE_CHILD_CAPACITY_TYPES:
-                    expr = (
-                        pulp.lpSum(
-                            processed_product[n, p, t] * resource_capacity_consumption.get((p, t, g, n, c),0) for p in PRODUCTS
-                        ) +
-                        pulp.lpSum(
-                            processed_product[n, p, t2] * resource_capacity_consumption.get((p, t2, g, n, c),0) for t2,p in product(PERIODS, PRODUCTS) if int(t2)>=int(t)-int(resource_capacity_consumption_periods.get((p,t2,g,n,c),0)) and int(t2)<int(t)
-                        )
-                        <=
-                        pulp.lpSum(resource_capacity[r,n,t,c] for r in RESOURCES)
-                    )
-                if c in RESOURCE_PARENT_CAPACITY_TYPES:
-                    c_p = c
-                    expr = (
-                        pulp.lpSum(
-                            processed_product[n, p, t] * resource_capacity_consumption.get((p, t, g, n, c2),0)*capacity_type_heirarchy.get((c2,c_p),0)  for p in PRODUCTS for c2 in RESOURCE_CHILD_CAPACITY_TYPES
-                        ) +
-                        pulp.lpSum(
-                            processed_product[n, p, t2] * resource_capacity_consumption.get((p, t2, g, n, c2),0)*capacity_type_heirarchy.get((c2,c_p),0) for t2,p,c2 in product(PERIODS, PRODUCTS,RESOURCE_CHILD_CAPACITY_TYPES) if int(t2)>=int(t)-int(resource_capacity_consumption_periods.get((p,t2,g,n,c),0)) and int(t2)<int(t)
-                        )
-                        <= pulp.lpSum(resource_capacity[r,n,t,c] for r in RESOURCES)
-                    )
-                model.addConstraint(expr, f"Capacity_Constraint_{n}_{t}_{c}_{g}_{r}")
-        logging.info(f"Added procesing less than processing capacity constraint: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
 
         # set arrived_and_completed_product equal to demand
         for n_r,t,p in product(RECEIVING_NODES,PERIODS,PRODUCTS):
@@ -708,7 +602,7 @@ def run_solver(input_values, settings):
         expr = (pulp.lpSum(arrived_and_completed_product[t, p, n_r] for t in PERIODS for p in PRODUCTS for n_r in RECEIVING_NODES) == total_arrived_and_completed_product)
         model.addConstraint(expr, f"total_arrived_and_completed_product_equals_demand")
         # processed volume assembly constraints
-        for t, p1, p2, n in product(PERIODS, PRODUCTS, PRODUCTS, NODES):
+        for t, p1, p2, n, g in product(PERIODS, PRODUCTS, PRODUCTS, NODES, NODEGROUPS):
             if node_in_nodegroup.get((n,g),0)==1:
                 if processing_assembly_p1_required.get((n,g,p1,p2),None) != None and processing_assembly_p2_required.get((n,g,p1,p2),None) != None:
                     expr = (processed_product[n,p1,t] * processing_assembly_p1_required[n,g,p1,p2] == processed_product[n,p2,t] * processing_assembly_p2_required[n,g,p1,p2])
@@ -805,80 +699,6 @@ def run_solver(input_values, settings):
                             
                             max_ob_carried_expr = (ob_max_carried.get((t_index, p_index, n_index, g_index), big_m) >= right_exp)
                             model += max_ob_carried_expr, f"OB_Max_Carried_{t_index}_{p_index}_{n_index}_{g_index}"
-
-
-        # Handle inbound carrying capacity constraints
-        for n_index in receiving_nodes:
-            for g_index in NODEGROUPS:
-                if n_index == '@' or node_in_nodegroup.get((n_index, g_index), 0) == 1:
-                    nodes_list = RECEIVING_NODES if n_index == '@' else [n_index]
-                    
-                    for t_index in periods:
-                        periods_list = PERIODS if t_index == '@' else [t_index]
-                        
-                        for u_index in measures:
-                            measures_list = MEASURES if u_index == '@' else [u_index]
-                            
-                            # Calculate expansion capacity sum
-                            expansion_sum = pulp.lpSum(
-                                use_carrying_capacity_option[n, e_c, t2] * 
-                                ib_carrying_expansion_capacity.get((t2, n, e_c), 0)
-                                for n in nodes_list 
-                                for e_c in C_CAPACITY_EXPANSIONS
-                                for t2 in periods_list if t_index == '@' or int(t2) <= int(t_index)
-                            )
-                            
-                            # Calculate carried demand sum
-                            demand_sum = pulp.lpSum(
-                                ib_carried_over_demand[n, p, t] * products_measures.get((p, u), 0)
-                                for n in nodes_list
-                                for p in PRODUCTS
-                                for t in periods_list
-                                for u in measures_list
-                            )
-                            
-                            capacity_expr = (
-                                ib_carrying_capacity.get((t_index, n_index, u_index, g_index), big_m) + 
-                                expansion_sum >= demand_sum
-                            )
-                            model += capacity_expr, f"IB_CarryingCapacity_{t_index}_{n_index}_{u_index}_{g_index}"
-
-
-        # Handle outbound carrying capacity constraints
-        for n_index in departing_nodes:
-            for g_index in NODEGROUPS:
-                if n_index == '@' or node_in_nodegroup.get((n_index, g_index), 0) == 1:
-                    nodes_list = DEPARTING_NODES if n_index == '@' else [n_index]
-                    
-                    for t_index in periods:
-                        periods_list = PERIODS if t_index == '@' else [t_index]
-                        
-                        for u_index in measures:
-                            measures_list = MEASURES if u_index == '@' else [u_index]
-                            
-                            # Calculate expansion capacity sum for outbound
-                            expansion_sum = pulp.lpSum(
-                                use_carrying_capacity_option[n, e_c, t2] * 
-                                ob_carrying_expansion_capacity.get((t2, n, e_c), 0)
-                                for n in nodes_list 
-                                for e_c in C_CAPACITY_EXPANSIONS
-                                for t2 in periods_list if t_index == '@' or int(t2) <= int(t_index)
-                            )
-                            
-                            # Calculate carried demand sum for outbound
-                            demand_sum = pulp.lpSum(
-                                ob_carried_over_demand[n, p, t] * products_measures.get((p, u), 0)
-                                for n in nodes_list
-                                for p in PRODUCTS
-                                for t in periods_list
-                                for u in measures_list
-                            )
-                            
-                            capacity_expr = (
-                                ob_carrying_capacity.get((t_index, n_index, u_index, g_index), big_m) + 
-                                expansion_sum >= demand_sum
-                            )
-                            model += capacity_expr, f"OB_CarryingCapacity_{t_index}_{n_index}_{u_index}_{g_index}"
 
 
         # Adhere to min and max flow constraints - units
@@ -1232,97 +1052,6 @@ def run_solver(input_values, settings):
         model += grand_total_carried_and_dropped_volume_cost_expr, "grand_total_carried_and_dropped_volume_cost_constraint"
         logging.info(f"Added carried and dropped volume cost constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
 
-        for o, d, t, m, u, tg,g,g2 in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES, MEASURES, TRANSPORTATION_GROUPS, NODEGROUPS, NODEGROUPS):
-            if node_in_nodegroup.get((o,g),0)==1 and node_in_nodegroup.get((d,g2),0)==1:
-                num_loads_constraint = (num_loads_by_group[o,d,t,m,tg] >= 
-                                        (pulp.lpSum(departed_measures[o,d,p,t,m,u]*transportation_group.get((p,tg),0) for p in PRODUCTS) / 
-                                        load_capacity.get((t,o,d,m,u,g,g2),big_m)))
-                model += num_loads_constraint, f"num_loads_by_group_{o}_{d}_{t}_{m}_{u}_{tg}_{g}_{g2}"
-
-        for o, d, t,m in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES):
-            num_loads_constraint = (num_loads[o,d,t,m] == pulp.lpSum(num_loads_by_group[o,d,t,m,g] for g in TRANSPORTATION_GROUPS))
-            model += num_loads_constraint, f"od_num_loads_{o}_{d}_{t}_{m}"
-
-        for o, d, t in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS):
-            od_num_loads_constraint = (od_num_loads[o,d,t] == pulp.lpSum(period_weight.get((int(t)),1) * num_loads[o,d,t,m] for m in MODES))
-            model += od_num_loads_constraint, f"od_num_loads_{o}_{d}_{t}"
-
-        for m, t in product(MODES, PERIODS):
-            mode_num_loads_constraint = (mode_num_loads[m,t] == pulp.lpSum(period_weight.get((int(t)),1) * num_loads[o,d,t,m] for o, d in product(DEPARTING_NODES, RECEIVING_NODES)))
-            model += mode_num_loads_constraint, f"mode_num_loads_{m}_{t}"
-
-        for o, d in product(DEPARTING_NODES, RECEIVING_NODES):
-            total_od_num_loads_constraint = (total_od_num_loads[o,d] == pulp.lpSum(od_num_loads[o,d,t] for t in PERIODS))
-            model += total_od_num_loads_constraint, f"total_od_num_loads_{o}_{d}"
-
-        for m in MODES:
-            total_mode_num_loads_constraint = (total_mode_num_loads[m] == pulp.lpSum(mode_num_loads[m,t] for t in PERIODS))
-            model += total_mode_num_loads_constraint, f"total_mode_num_loads_{m}"
-
-        for t in PERIODS:
-            total_num_loads_constraint = (total_num_loads[t] == pulp.lpSum(mode_num_loads[m,t] for m in MODES))
-            model += total_num_loads_constraint, f"total_num_loads_{t}"
-
-        if (distance and transportation_cost_variable_distance) or (transportation_cost_variable_time and transit_time):
-            for o, d, t, m, u,g,g2 in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES, MEASURES,NODEGROUPS,NODEGROUPS):
-                if node_in_nodegroup.get((o,g),0)==1 and node_in_nodegroup.get((d,g2),0)==1:
-                    variable_transportation_costs_constraint = (variable_transportation_costs[o,d,t,m,u] >= 
-                                                                pulp.lpSum(period_weight.get((int(t)),1) * departed_measures[o,d,p,t,m,u] * 
-                                                                (transportation_cost_variable_distance.get((o,d,m,'unit',u,t,g,g2),big_m) * distance.get((o,d,m),big_m) + 
-                                                                transportation_cost_variable_time.get((o,d,m,'unit',u,t,g,g2),big_m) * transit_time.get((o,d,m),big_m)) 
-                                                                for p in PRODUCTS))
-                    model += variable_transportation_costs_constraint, f"variable_transportation_costs_{o}_{d}_{t}_{m}_{u}_{g}_{g2}"
-        if transportation_cost_fixed:
-            for o, d, t, m, u,g,g2 in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES, MEASURES,NODEGROUPS,NODEGROUPS):
-                if node_in_nodegroup.get((o,g),0)==1 and node_in_nodegroup.get((d,g2),0)==1:
-                    fixed_transportation_costs_constraint = (fixed_transportation_costs[o,d,t,m,u] >=  
-                                                            pulp.lpSum(period_weight.get((int(t)),1) *departed_measures[o,d,p,t,m,u] * 
-                                                            transportation_cost_fixed.get((o,d,m,'unit',u,t,g,g2),big_m) for p in PRODUCTS))
-                    model += fixed_transportation_costs_constraint, f"fixed_transportation_costs_{o}_{d}_{t}_{m}_{u}_{g}_{g2}"
-
-        if (distance and transportation_cost_variable_distance) or (transportation_cost_variable_time and transit_time) or transportation_cost_fixed:
-            for o, d, t, m,g,g2 in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES,NODEGROUPS,NODEGROUPS):
-                if node_in_nodegroup.get((o,g),0)==1 and node_in_nodegroup.get((d,g2),0)==1:
-                    transportation_costs_constraint = (transportation_costs[o,d,t,m] >= (period_weight.get((int(t)),1) * num_loads[o,d,t,m] * 
-                                                    (transportation_cost_variable_distance.get((o,d,m,'load','count',t,g,g2),big_m) * distance.get((o,d,m),big_m) +
-                                                    transportation_cost_variable_time.get((o,d,m,'load','count',t,g,g2),big_m) * transit_time.get((o,d,m),big_m) +
-                                                    transportation_cost_fixed.get((o,d,m,'load','count',t,g,g2),big_m))) +
-                                                    pulp.lpSum(variable_transportation_costs[o,d,t,m,u] + fixed_transportation_costs[o,d,t,m,u] for u in MEASURES))
-                    model += transportation_costs_constraint, f"transportation_costs_{o}_{d}_{t}_{m}_{g}_{g2}"
-
-        if transportation_cost_minimum:
-            for o, d, t, m, p, g, g2 in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS, MODES,PRODUCTS, NODEGROUPS, NODEGROUPS):
-                if node_in_nodegroup.get((o,g),0)==1 and node_in_nodegroup.get((d,g2),0)==1:
-                    transportation_costs_minimum_constraint = (transportation_costs[o,d,t,m] >= pulp.lpSum(transportation_cost_minimum.get((o,d,m,'unit',u,t,g,g2),big_m) for u in MEASURES)*
-                                                            binary_product_destination_assignment[o,t,p,d]  + 
-                                                            transportation_cost_minimum.get((o,d,m,'load','count',t,g,g2),big_m)*
-                                                            binary_product_destination_assignment[o,t,p,d] )
-                    model += transportation_costs_minimum_constraint, f"transportation_costs_minimum_{o}_{d}_{t}_{m}_{p}_{g}_{g2}"
-
-        for o, d, t in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS):
-            od_transportation_costs_constraint = (od_transportation_costs[o,d,t] >= pulp.lpSum(variable_transportation_costs[o,d,t,m,u] + fixed_transportation_costs[o,d,t,m,u] for m, u in product(MODES, MEASURES)))
-            model += od_transportation_costs_constraint, f"od_transportation_costs_{o}_{d}_{t}"
-
-        for m, t in product(MODES, PERIODS):
-            mode_transportation_costs_constraint = (mode_transportation_costs[t,m] >= pulp.lpSum(variable_transportation_costs[o,d,t,m,u] + fixed_transportation_costs[o,d,t,m,u] for o, d, u in product(DEPARTING_NODES, RECEIVING_NODES, MEASURES)))
-            model += mode_transportation_costs_constraint, f"mode_transportation_costs_{t}_{m}"
-
-        for o, d in product(DEPARTING_NODES, RECEIVING_NODES):
-            total_od_transportation_costs_constraint = (total_od_transportation_costs[o,d] >= pulp.lpSum(transportation_costs[o,d,t,m] for t, m in product(PERIODS, MODES)))
-            model += total_od_transportation_costs_constraint, f"total_od_transportation_costs_{o}_{d}"
-
-        for m in MODES:
-            total_mode_transportation_costs_constraint = (total_mode_transportation_costs[m] >= pulp.lpSum(transportation_costs[o,d,t,m] for o, d, t in product(DEPARTING_NODES, RECEIVING_NODES, PERIODS)))
-            model += total_mode_transportation_costs_constraint, f"total_mode_transportation_costs_{m}"
-
-        for t in PERIODS:
-            total_time_transportation_costs_constraint = (total_time_transportation_costs[t] >= pulp.lpSum(transportation_costs[o,d,t,m] for o, d, m in product(DEPARTING_NODES, RECEIVING_NODES, MODES)))
-            model += total_time_transportation_costs_constraint, f"total_time_transportation_costs_{t}"
-
-        grand_total_transportation_costs_constraint = (grand_total_transportation_costs >= pulp.lpSum(total_time_transportation_costs[t] for t in PERIODS))
-        model += grand_total_transportation_costs_constraint, "grand_total_transportation_costs"
-        logging.info(f"Added transportation cost constraints: {round((datetime.now() - compile_model_start).seconds, 0)} seconds.")
-
         for o, p, t, g in product(NODES, PRODUCTS, PERIODS,NODEGROUPS):
             if node_in_nodegroup.get((o,g),0)==1:
                 constraint_expr = variable_operating_costs[o, p, t] == period_weight.get((int(t)),1) * operating_costs_variable.get((t, o, p, g),0) * processed_product[o, p, t]
@@ -1607,10 +1336,10 @@ def run_solver(input_values, settings):
                         c_p=c
                         if initial_capacity>0:
                             expr = (node_utilization[n,t,c_p] <=( pulp.lpSum(
-                                        processed_product[n, p, t] * resource_capacity_consumption.get((p, t, g, n, c2),0) * capacity_type_heirarchy.get((c2,c_p),0) for p in PRODUCTS for c2 in RESOURCE_CHILD_CAPACITY_TYPES
+                                        processed_product[n, p, t] * resource_capacity_consumption.get((p, t, g, n, c2),0) * capacity_type_hierarchy.get((c2,c_p),0) for p in PRODUCTS for c2 in RESOURCE_CHILD_CAPACITY_TYPES
                                     ) +
                                     pulp.lpSum( 
-                                        processed_product[n, p, t2] * resource_capacity_consumption.get((p, t2, g, n, c2),0) * capacity_type_heirarchy.get((c2,c_p),0) for t2,p,c2 in product(PERIODS, PRODUCTS,RESOURCE_CHILD_CAPACITY_TYPES) if int(t2)>=int(t)-int(capacity_consumption_periods.get((t2,n,p,g),0)) and int(t2)<int(t)
+                                        processed_product[n, p, t2] * resource_capacity_consumption.get((p, t2, g, n, c2),0) * capacity_type_hierarchy.get((c2,c_p),0) for t2,p,c2 in product(PERIODS, PRODUCTS,RESOURCE_CHILD_CAPACITY_TYPES) if int(t2)>=int(t)-int(capacity_consumption_periods.get((t2,n,p,g),0)) and int(t2)<int(t)
                                     ))/
                                     (initial_capacity )
                                 )
@@ -1623,23 +1352,19 @@ def run_solver(input_values, settings):
             expr = ( pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a,m] for n_r in RECEIVING_NODES )<=pulp.lpSum(departed_product_by_mode[n_d, n_r, p, t,m] for n_r in RECEIVING_NODES)-pulp.lpSum(vol_departed_by_age[n_d,n_r, p, t, a2,m] for n_r in RECEIVING_NODES for a2 in AGES if int(a2)>int(a)))
             model.addConstraint(expr, f"departed_by_age_fifo_constraint_{n_d}_{p}_{t}_{a}_{m}")
 
-
-        for n,t,c in product(NODES, PERIODS, RESOURCE_CAPACITY_TYPES):
-            expr = (max_capacity_utilization>=node_utilization[n,t,c])
-            model.addConstraint(expr, f"max_capacity_utilization_constraint_{n}_{t}_{c}")
-
-        for o,t,d,p,m in product(DEPARTING_NODES, PERIODS, RECEIVING_NODES,PRODUCTS,MODES):
-            expr = (max_transit_distance>= binary_product_destination_assignment[o, t, p, d] * distance.get((o,d,m),big_m))
-            model.addConstraint(expr, f"max_transit_distance_constraint_{o}_{t}_{d}_{p}_{m}")
-
-
         # Create constraint handlers
         flow_constraints = FlowConstraints(variables, list_of_sets, list_of_parameters)
         age_constraints = AgeConstraints(variables, list_of_sets, list_of_parameters)
+        transportation_constraints = TransportationConstraints(variables, list_of_sets, list_of_parameters)
+        resource_constraints = ResourceConstraints(variables, list_of_sets, list_of_parameters)
+        capacity_constraints = CapacityConstraints(variables, list_of_sets, list_of_parameters)
 
         # Add constraints to model
         flow_constraints.build(model)
         age_constraints.build(model)
+        transportation_constraints.build(model)
+        resource_constraints.build(model)
+        capacity_constraints.build(model)
 
         solve_start =datetime.now()
         result = get_solver_results(model,objectives_input,parameters_input,list_of_sets,list_of_parameters,variables, settings)

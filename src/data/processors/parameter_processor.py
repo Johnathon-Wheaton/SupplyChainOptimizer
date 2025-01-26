@@ -200,7 +200,7 @@ class ParameterProcessor:
         )
 
         # Capacity hierarchy parameters
-        parameters['capacity_type_heirarchy'] = self.create_parameter_dict(
+        parameters['capacity_type_hierarchy'] = self.create_parameter_dict(
             input_data['resource_capacity_types_input'][
                 ~input_data['resource_capacity_types_input']['Parent Capacity Type'].isna()
             ],
