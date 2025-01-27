@@ -12,6 +12,8 @@ class ResourceConstraints(BaseConstraint):
         self._build_resource_attribute_constraints(model)
         self._build_resource_binary_constraints(model)
         self._build_resource_cost_constraints(model)
+        self._build_resource_attribute_limits_constraints(model)
+        self._build_resource_utilization_constraints(model)
 
     def _build_resource_assignment_constraints(self, model: pulp.LpProblem) -> None:
         """Constraints for resource assignment across periods and node groups"""
@@ -270,3 +272,211 @@ class ResourceConstraints(BaseConstraint):
             )
         )
         model += (expr, "resources_grand_total_cost")
+
+    def _build_resource_attribute_limits_constraints(self, model: pulp.LpProblem) -> None:
+        """Build constraints for resource attribute limits"""
+        # Add '@' to lists for aggregation
+        resourceattributes = list(self.network_sets['RESOURCE_ATTRIBUTES']) + ['@']
+        resources = list(self.network_sets['RESOURCES']) + ['@']
+        nodes = list(self.network_sets['NODES']) + ['@']
+        periods = list(self.network_sets['PERIODS']) + ['@']
+        nodegroups = list(self.network_sets['NODEGROUPS']) + ['@']
+
+        if (self.parameters.get('resource_attribute_min') or 
+            self.parameters.get('resource_attribute_max')):
+            
+            for n_index in nodes:
+                for g_index in nodegroups:
+                    if n_index == '@' or self.parameters['node_in_nodegroup'].get((n_index, g_index), 0) == 1:
+                        nodes_list = self.network_sets['NODES'] if n_index == '@' else [n_index]
+                        
+                        for t_index in periods:
+                            periods_list = self.network_sets['PERIODS'] if t_index == '@' else [t_index]
+                            
+                            for r_index in resources:
+                                resources_list = self.network_sets['RESOURCES'] if r_index == '@' else [r_index]
+                                
+                                # Resource addition min/max constraints
+                                min_add_expr = (
+                                    self.parameters['resource_min_to_add'].get((t_index, n_index, r_index, g_index), 0) <= 
+                                    pulp.lpSum(
+                                        self.variables['resources_added'][r,n,t]
+                                        for n in nodes_list
+                                        for r in resources_list
+                                        for t in periods_list
+                                    )
+                                )
+                                model += (min_add_expr, f"resources_added_min_{t_index}_{n_index}_{r_index}_{g_index}")
+                                
+                                max_add_expr = (
+                                    self.parameters['resource_max_to_add'].get(
+                                        (t_index, n_index, r_index, g_index),
+                                        self.big_m
+                                    ) >= pulp.lpSum(
+                                        self.variables['resources_added'][r,n,t]
+                                        for n in nodes_list
+                                        for r in resources_list
+                                        for t in periods_list
+                                    )
+                                )
+                                model += (max_add_expr, f"resource_added_max_{t_index}_{n_index}_{r_index}_{g_index}")
+
+                                # Resource removal min/max constraints
+                                min_remove_expr = (
+                                    self.parameters['resource_min_to_remove'].get((t_index, n_index, r_index, g_index), 0) <= 
+                                    pulp.lpSum(
+                                        self.variables['resources_removed'][r,n,t]
+                                        for n in nodes_list
+                                        for r in resources_list
+                                        for t in periods_list
+                                    )
+                                )
+                                model += (min_remove_expr, f"resources_removed_min_{t_index}_{n_index}_{r_index}_{g_index}")
+                                
+                                max_remove_expr = (
+                                    self.parameters['resource_max_to_remove'].get(
+                                        (t_index, n_index, r_index, g_index),
+                                        self.big_m
+                                    ) >= pulp.lpSum(
+                                        self.variables['resources_removed'][r,n,t]
+                                        for n in nodes_list
+                                        for r in resources_list
+                                        for t in periods_list
+                                    )
+                                )
+                                model += (max_remove_expr, f"resource_removed_max_{t_index}_{n_index}_{r_index}_{g_index}")
+
+                                # Total resource count min/max constraints
+                                min_total_expr = (
+                                    self.parameters['resource_node_min_count'].get((t_index, n_index, r_index, g_index), 0) <= 
+                                    pulp.lpSum(
+                                        self.variables['resources_assigned'][r,n,t]
+                                        for n in nodes_list
+                                        for r in resources_list
+                                        for t in periods_list
+                                    )
+                                )
+                                model += (min_total_expr, f"resources_total_min_{t_index}_{n_index}_{r_index}_{g_index}")
+                                
+                                max_total_expr = (
+                                    self.parameters['resource_node_max_count'].get(
+                                        (t_index, n_index, r_index, g_index),
+                                        self.big_m
+                                    ) >= pulp.lpSum(
+                                        self.variables['resources_assigned'][r,n,t]
+                                        for n in nodes_list
+                                        for r in resources_list
+                                        for t in periods_list
+                                    )
+                                )
+                                model += (max_total_expr, f"resources_total_max_{t_index}_{n_index}_{r_index}_{g_index}")
+
+                                # Resource attribute min/max constraints
+                                for a_index in resourceattributes:
+                                    resource_attributes_list = (
+                                        self.network_sets['RESOURCE_ATTRIBUTES'] 
+                                        if a_index == '@' else [a_index]
+                                    )
+                                    
+                                    min_attr_expr = (
+                                        self.parameters['resource_attribute_min'].get(
+                                            (t_index, n_index, r_index, g_index, a_index), 0
+                                        ) <= pulp.lpSum(
+                                            self.variables['resources_assigned'][r,n,t] * 
+                                            self.parameters['resource_attribute_consumption_per'].get((t,r,a), 0)
+                                            for n in nodes_list
+                                            for r in resources_list
+                                            for t in periods_list
+                                            for a in resource_attributes_list
+                                        )
+                                    )
+                                    model += (min_attr_expr, f"resource_attribute_min_constraint_{t_index}_{n_index}_{a_index}_{r_index}_{g_index}")
+                                    
+                                    max_attr_expr = (
+                                        self.parameters['resource_attribute_max'].get(
+                                            (t_index, n_index, r_index, g_index, a_index),
+                                            self.big_m
+                                        ) >= pulp.lpSum(
+                                            self.variables['resources_assigned'][r,n,t] * 
+                                            self.parameters['resource_attribute_consumption_per'].get((t,r,a), 0)
+                                            for n in nodes_list
+                                            for r in resources_list
+                                            for t in periods_list
+                                            for a in resource_attributes_list
+                                        )
+                                    )
+                                    model += (max_attr_expr, f"resource_attribute_max_constraint_{t_index}_{n_index}_{a_index}_{r_index}_{g_index}")
+
+    def _build_resource_utilization_constraints(self, model: pulp.LpProblem) -> None:
+        """Build constraints for resource utilization tracking"""
+        if self.parameters.get('resource_capacity_consumption'):
+            for r, n, t, c, g in product(
+                self.network_sets['RESOURCES'],
+                self.network_sets['NODES'],
+                self.network_sets['PERIODS'],
+                self.network_sets['RESOURCE_CHILD_CAPACITY_TYPES'],
+                self.network_sets['NODEGROUPS']
+            ):
+                if (self.parameters['node_in_nodegroup'].get((n,g),0) == 1 and 
+                    self.parameters['resource_capacity_by_type'].get((t,n,r,c,g)) is not None):
+                    
+                    initial_capacity = (
+                        self.parameters['resource_capacity_by_type'].get((t,n,r,c,g), 1) * 
+                        self.parameters['resource_node_initial_count'].get((n,r,g), 0)
+                    )
+                    
+                    # Child capacity types
+                    if c in self.network_sets['RESOURCE_CHILD_CAPACITY_TYPES']:
+                        if initial_capacity > 0:
+                            expr = (
+                                self.variables['node_utilization'][n,t,c] <= (
+                                    pulp.lpSum(
+                                        self.variables['processed_product'][n,p,t] * 
+                                        self.parameters['resource_capacity_consumption'].get((p,t,g,n,c), 0) 
+                                        for p in self.network_sets['PRODUCTS']
+                                    ) +
+                                    pulp.lpSum(
+                                        self.variables['processed_product'][n,p,t2] * 
+                                        self.parameters['resource_capacity_consumption'].get((p,t2,g,n,c), 0)
+                                        for t2, p in product(
+                                            self.network_sets['PERIODS'],
+                                            self.network_sets['PRODUCTS']
+                                        )
+                                        if int(t2) >= int(t) - int(self.parameters['capacity_consumption_periods'].get((t2,n,p,g), 0))
+                                        and int(t2) < int(t)
+                                    )
+                                ) / initial_capacity
+                            )
+                        else:
+                            expr = (self.variables['node_utilization'][n,t,c] == 0)
+                        model += (expr, f"Utilization_constraint_{r}_{n}_{t}_{c}_{g}")
+
+                    # Parent capacity types
+                    if c in self.network_sets['RESOURCE_PARENT_CAPACITY_TYPES']:
+                        if initial_capacity > 0:
+                            expr = (
+                                self.variables['node_utilization'][n,t,c] <= (
+                                    pulp.lpSum(
+                                        self.variables['processed_product'][n,p,t] * 
+                                        self.parameters['resource_capacity_consumption'].get((p,t,g,n,c2), 0) * 
+                                        self.parameters['capacity_type_hierarchy'].get((c2,c), 0)
+                                        for p in self.network_sets['PRODUCTS']
+                                        for c2 in self.network_sets['RESOURCE_CHILD_CAPACITY_TYPES']
+                                    ) +
+                                    pulp.lpSum(
+                                        self.variables['processed_product'][n,p,t2] * 
+                                        self.parameters['resource_capacity_consumption'].get((p,t2,g,n,c2), 0) * 
+                                        self.parameters['capacity_type_hierarchy'].get((c2,c), 0)
+                                        for t2, p, c2 in product(
+                                            self.network_sets['PERIODS'],
+                                            self.network_sets['PRODUCTS'],
+                                            self.network_sets['RESOURCE_CHILD_CAPACITY_TYPES']
+                                        )
+                                        if int(t2) >= int(t) - int(self.parameters['capacity_consumption_periods'].get((t2,n,p,g), 0))
+                                        and int(t2) < int(t)
+                                    )
+                                ) / initial_capacity
+                            )
+                        else:
+                            expr = (self.variables['node_utilization'][n,t,c] == 0)
+                        model += (expr, f"Utilization_constraint_{r}_{n}_{t}_{c}_{g}")
