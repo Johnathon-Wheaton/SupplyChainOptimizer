@@ -549,5 +549,6 @@ class ParameterProcessor:
             ['Product', 'Period', 'Node Group', 'Node', 'Capacity Type'],
             'Periods of Capacity Consumption'
         )
-
+        parameters['max_launch_cost'] = input_data['scenarios_input']['Max Launch Cost'][0]
+        
         return parameters

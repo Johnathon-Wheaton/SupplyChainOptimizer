@@ -161,7 +161,7 @@ def run_solver(input_values, settings):
         RESOURCE_PARENT_CAPACITY_TYPES = list_of_sets["RESOURCE_PARENT_CAPACITY_TYPES"]
         RESOURCE_CHILD_CAPACITY_TYPES = list_of_sets["RESOURCE_CHILD_CAPACITY_TYPES"]
         RESOURCE_ATTRIBUTES = list_of_sets["RESOURCE_ATTRIBUTES"]
-
+        
         #set binary node to node group assignment
         filtered_dataframes['node_groups_input']['assigned'] = 1
         filtered_dataframes['node_groups_input'] = DataPreprocessor.split_asterisk_values(filtered_dataframes['node_groups_input'], 'Group', NODEGROUPS)

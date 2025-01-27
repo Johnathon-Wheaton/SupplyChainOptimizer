@@ -14,7 +14,6 @@ class AgeConstraints(BaseConstraint):
         self._build_age_limit_constraints(model)
         self._build_age_violation_constraints(model)
         self._build_max_age_constraints(model)
-        self._build_age_limit_constraints(model)
 
     def _build_age_receiving_constraints(self, model: pulp.LpProblem) -> None:
         """Build constraints for receiving volumes by age"""
@@ -284,6 +283,33 @@ class AgeConstraints(BaseConstraint):
             )
             model += (expr, f"dropped_by_age_fifo_constraint_{n}_{p}_{t}_{a}")
 
+        # FIFO constraints for departed volumes
+        for n_d, p, t, a, m in product(
+            self.network_sets['DEPARTING_NODES'],
+            self.network_sets['PRODUCTS'],
+            self.network_sets['PERIODS'],
+            self.network_sets['AGES'],
+            self.network_sets['MODES']
+        ):
+            expr = (
+                pulp.lpSum(
+                    self.variables['vol_departed_by_age'][n_d, n_r, p, t, a, m] 
+                    for n_r in self.network_sets['RECEIVING_NODES']
+                ) <= 
+                pulp.lpSum(
+                    self.variables['departed_product_by_mode'][n_d, n_r, p, t, m] 
+                    for n_r in self.network_sets['RECEIVING_NODES']
+                ) - 
+                pulp.lpSum(
+                    self.variables['vol_departed_by_age'][n_d, n_r, p, t, a2, m] 
+                    for n_r in self.network_sets['RECEIVING_NODES'] 
+                    for a2 in self.network_sets['AGES'] 
+                    if int(a2) > int(a)
+                )
+            )
+            model += (expr, f"departed_by_age_fifo_constraint_{n_d}_{p}_{t}_{a}_{m}")
+
+
     def _build_age_violation_constraints(self, model: pulp.LpProblem) -> None:
         """Build constraints for age limit violations and associated costs"""
         if self.parameters.get('max_vol_by_age'):
@@ -366,33 +392,4 @@ class AgeConstraints(BaseConstraint):
                 ) <= self.variables['is_age_received'][a] * self.big_m
             )
             model += (expr, f"binary_is_age_received_constraint_{a}")
-    
-    def _build_age_limit_constraints(self, model: pulp.LpProblem) -> None:
-        """Build constraints for age limits and FIFO rules"""
-        # FIFO constraints for departed volumes
-        for n_d, p, t, a, m in product(
-            self.network_sets['DEPARTING_NODES'],
-            self.network_sets['PRODUCTS'],
-            self.network_sets['PERIODS'],
-            self.network_sets['AGES'],
-            self.network_sets['MODES']
-        ):
-            expr = (
-                pulp.lpSum(
-                    self.variables['vol_departed_by_age'][n_d, n_r, p, t, a, m] 
-                    for n_r in self.network_sets['RECEIVING_NODES']
-                ) <= 
-                pulp.lpSum(
-                    self.variables['departed_product_by_mode'][n_d, n_r, p, t, m] 
-                    for n_r in self.network_sets['RECEIVING_NODES']
-                ) - 
-                pulp.lpSum(
-                    self.variables['vol_departed_by_age'][n_d, n_r, p, t, a2, m] 
-                    for n_r in self.network_sets['RECEIVING_NODES'] 
-                    for a2 in self.network_sets['AGES'] 
-                    if int(a2) > int(a)
-                )
-            )
-            model += (expr, f"departed_by_age_fifo_constraint_{n_d}_{p}_{t}_{a}_{m}")
-
             

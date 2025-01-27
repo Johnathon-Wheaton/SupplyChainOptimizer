@@ -10,7 +10,6 @@ class CostConstraints(BaseConstraint):
     def build(self, model: pulp.LpProblem) -> None:
         """Build all cost constraints"""
         # self._build_cost_constraints(model)
-        self._build_cost_limit_constraints(model)
         self._build_carried_volume_cost_constraints(model)
         self._build_operating_cost_constraints(model)
         self._build_launch_constraints(model)
@@ -446,7 +445,7 @@ class CostConstraints(BaseConstraint):
         model += (expr, "grand_total_launch_cost")
 
         expr = (self.variables['grand_total_launch_cost'] <= 
-               self.parameters['scenarios_input']['Max Launch Cost'][0])
+               self.parameters['max_launch_cost'])
         model += (expr, "grand_total_launch_cost_2")
 
         # Launch and volume processing constraints
