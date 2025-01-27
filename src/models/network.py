@@ -26,60 +26,35 @@ class Network:
         self.node_groups = self.input_data['node_groups_input']['Group'].unique()
         
         # Origin/destination nodes
-        self.origins = self.input_data['nodes_input'][
-            self.input_data['nodes_input']['Origin Node']=="X"
-        ]['Name'].unique()
-        
-        self.destinations = self.input_data['nodes_input'][
-            self.input_data['nodes_input']['Destination Node']=="X"
-        ]['Name'].unique()
+        self.origins = self._get_nodes_by_flag('Origin Node')
+        self.destinations = self._get_nodes_by_flag('Destination Node')
         
         # Intermediate nodes
-        self.receive_from_origin_nodes = self.input_data['nodes_input'][
-            self.input_data['nodes_input']['Receive from Origins']=="X"
-        ]['Name'].unique()
-        
-        self.receive_from_intermediates_nodes = self.input_data['nodes_input'][
-            self.input_data['nodes_input']['Receive from Intermediates']=="X"
-        ]['Name'].unique()
-        
-        self.send_to_destinations_nodes = self.input_data['nodes_input'][
-            self.input_data['nodes_input']['Send to Destinations']=="X"
-        ]['Name'].unique()
-        
-        self.send_to_intermediates_nodes = self.input_data['nodes_input'][
-            self.input_data['nodes_input']['Send to Intermediates']=="X"
-        ]['Name'].unique()
-        
-        self.intermediates = self.input_data['nodes_input'][
-            self.input_data['nodes_input']['Intermediate Node']=="X"
-        ]['Name'].unique()
+        self.receive_from_origin_nodes = self._get_nodes_by_flag('Receive from Origins')
+        self.receive_from_intermediates_nodes = self._get_nodes_by_flag('Receive from Intermediates')
+        self.send_to_destinations_nodes = self._get_nodes_by_flag('Send to Destinations')
+        self.send_to_intermediates_nodes = self._get_nodes_by_flag('Send to Intermediates')
+        self.intermediates = self._get_nodes_by_flag('Intermediate Node')
         
         # Combined node sets
         self.departing_nodes = np.unique(np.concatenate((self.intermediates, self.origins)))
         self.receiving_nodes = np.unique(np.concatenate((self.intermediates, self.destinations)))
         
-        # Time periods
+        # Time periods and ages
         self.periods = list(map(str, self.input_data['periods_input']['Period'].unique()))
         self.ages = [str(int(age)-1) for age in self.periods]
         
         # Products and measures
         self.products = self.input_data['products_input']['Product'].unique()
-        measures = self.input_data['products_input']['Measure'].unique()
-        self.measures = [measure for measure in measures if measure != "*"]
+        self.measures = self._get_unique_non_asterisk_values('products_input', 'Measure')
         
         # Transportation
-        containers = self.input_data['transportation_costs_input']['Container'].unique()
-        self.containers = [container for container in containers if container != "*"]
-        modes = self.input_data['transportation_costs_input']['Mode'].unique()
-        self.modes = [mode for mode in modes if mode != "*"]
+        self.containers = self._get_unique_non_asterisk_values('transportation_costs_input', 'Container')
+        self.modes = self._get_unique_non_asterisk_values('transportation_costs_input', 'Mode')
         
         # Capacity expansions
-        c_capacity_expansions = self.input_data['carrying_expansions_input']['Incremental Capacity Label'].unique()
-        self.c_capacity_expansions = c_capacity_expansions if len(c_capacity_expansions) > 0 else ["NA"]
-        
-        t_capacity_expansions = self.input_data['transportation_expansions_input']['Incremental Capacity Label'].unique()
-        self.t_capacity_expansions = t_capacity_expansions if len(t_capacity_expansions) > 0 else ["NA"]
+        self.c_capacity_expansions = self._get_capacity_expansions('carrying_expansions_input', 'Incremental Capacity Label')
+        self.t_capacity_expansions = self._get_capacity_expansions('transportation_expansions_input', 'Incremental Capacity Label')
         
         # Transportation groups
         self.transportation_groups = self.input_data['product_transportation_groups_input']['Group'].unique()
@@ -88,49 +63,39 @@ class Network:
         self.resources = self.input_data['resource_costs_input']['Resource'].unique()
         self.resource_capacity_types = self.input_data['resource_capacity_types_input']['Capacity Type'].unique()
         
+        # Parent and child capacity types
         resource_parent_capacity_types = self.input_data['resource_capacity_types_input']['Parent Capacity Type'].unique()
         self.resource_parent_capacity_types = [cap_type for cap_type in resource_parent_capacity_types if pd.notna(cap_type)]
         self.resource_child_capacity_types = [cap_type for cap_type in self.resource_capacity_types 
                                             if cap_type not in self.resource_parent_capacity_types]
         
         # Resource attributes
-        resource_attributes = self.input_data['resource_attributes_input']['Resource Attribute'].unique()
-        self.resource_attributes = resource_attributes if len(resource_attributes) > 0 else ["NA"]
+        self.resource_attributes = self._get_resource_attributes()
 
-    def get_all_sets(self) -> Dict[str, List]:
-        """Get dictionary of all network sets
-        
-        Returns:
-            Dictionary containing all network sets
-        """
-        return {
-            "NODES": self.nodes.keys(),
-            "NODETYPES": self.node_types,
-            "NODEGROUPS": self.node_groups.tolist(),
-            "ORIGINS": self.origins,
-            "DESTINATIONS": self.destinations,
-            "RECEIVE_FROM_ORIGIN_NODES": self.receive_from_origin_nodes,
-            "RECEIVE_FROM_INTERMEDIATES_NODES": self.receive_from_intermediates_nodes,
-            "SEND_TO_DESTINATIONS_NODES": self.send_to_destinations_nodes,
-            "SEND_TO_INTERMEDIATES_NODES": self.send_to_intermediates_nodes,
-            "INTERMEDIATES": self.intermediates,
-            "DEPARTING_NODES": self.departing_nodes,
-            "RECEIVING_NODES": self.receiving_nodes,
-            "PERIODS": self.periods,
-            "AGES": self.ages,
-            "PRODUCTS": self.products,
-            "MEASURES": self.measures,
-            "CONTAINERS": self.containers,
-            "MODES": self.modes,
-            "C_CAPACITY_EXPANSIONS": self.c_capacity_expansions,
-            "T_CAPACITY_EXPANSIONS": self.t_capacity_expansions,
-            "TRANSPORTATION_GROUPS": self.transportation_groups,
-            "RESOURCES": self.resources.tolist(),
-            "RESOURCE_CAPACITY_TYPES": self.resource_capacity_types.tolist(),
-            "RESOURCE_PARENT_CAPACITY_TYPES": self.resource_parent_capacity_types,
-            "RESOURCE_CHILD_CAPACITY_TYPES": self.resource_child_capacity_types,
-            "RESOURCE_ATTRIBUTES": self.resource_attributes,
-        }
+    def _get_nodes_by_flag(self, flag_column: str) -> np.ndarray:
+        """Get nodes that have 'X' in the specified flag column"""
+        return self.input_data['nodes_input'][
+            self.input_data['nodes_input'][flag_column] == "X"
+        ]['Name'].unique()
+
+    def _get_unique_non_asterisk_values(self, df_name: str, column: str) -> List[str]:
+        """Get unique values from a column excluding asterisk"""
+        values = self.input_data[df_name][column].unique()
+        return [value for value in values if value != "*"]
+
+    def _get_capacity_expansions(self, df_name: str, column: str) -> List[str]:
+        """Get capacity expansion values, returning ['NA'] if empty"""
+        if df_name not in self.input_data:
+            return ["NA"]
+        expansions = self.input_data[df_name][column].unique()
+        return expansions if len(expansions) > 0 else ["NA"]
+
+    def _get_resource_attributes(self) -> List[str]:
+        """Get resource attributes, returning ['NA'] if empty"""
+        if 'resource_attributes_input' not in self.input_data:
+            return ["NA"]
+        attributes = self.input_data['resource_attributes_input']['Resource Attribute'].unique()
+        return attributes if len(attributes) > 0 else ["NA"]
 
     def _initialize_nodes(self) -> None:
         """Initialize node objects from input data"""
@@ -167,6 +132,41 @@ class Network:
                 max_shutdown_duration=row['Max Shutdown Duration']
             )
 
+    def get_all_sets(self) -> Dict[str, List]:
+        """Get dictionary of all network sets
+        
+        Returns:
+            Dictionary containing all network sets
+        """
+        return {
+            "NODES": self.nodes.keys(),
+            "NODETYPES": self.node_types,
+            "NODEGROUPS": self.node_groups.tolist(),
+            "ORIGINS": self.origins,
+            "DESTINATIONS": self.destinations,
+            "RECEIVE_FROM_ORIGIN_NODES": self.receive_from_origin_nodes,
+            "RECEIVE_FROM_INTERMEDIATES_NODES": self.receive_from_intermediates_nodes,
+            "SEND_TO_DESTINATIONS_NODES": self.send_to_destinations_nodes,
+            "SEND_TO_INTERMEDIATES_NODES": self.send_to_intermediates_nodes,
+            "INTERMEDIATES": self.intermediates,
+            "DEPARTING_NODES": self.departing_nodes,
+            "RECEIVING_NODES": self.receiving_nodes,
+            "PERIODS": self.periods,
+            "AGES": self.ages,
+            "PRODUCTS": self.products,
+            "MEASURES": self.measures,
+            "CONTAINERS": self.containers,
+            "MODES": self.modes,
+            "C_CAPACITY_EXPANSIONS": self.c_capacity_expansions,
+            "T_CAPACITY_EXPANSIONS": self.t_capacity_expansions,
+            "TRANSPORTATION_GROUPS": self.transportation_groups,
+            "RESOURCES": self.resources.tolist(),
+            "RESOURCE_CAPACITY_TYPES": self.resource_capacity_types.tolist(),
+            "RESOURCE_PARENT_CAPACITY_TYPES": self.resource_parent_capacity_types,
+            "RESOURCE_CHILD_CAPACITY_TYPES": self.resource_child_capacity_types,
+            "RESOURCE_ATTRIBUTES": self.resource_attributes,
+        }
+
     def validate_network(self) -> None:
         """Validate network structure and configuration"""
         self._validate_node_connections()
@@ -196,7 +196,6 @@ class Network:
 
     def _validate_flow_paths(self) -> None:
         """Validate that valid flow paths exist"""
-        # Check connectivity from origins to destinations
         reachable_nodes = self._get_reachable_nodes()
         unreachable_destinations = [
             node.name for node in self.nodes.values()
@@ -271,6 +270,6 @@ class Network:
             'num_intermediates': len([n for n in self.nodes.values() if n.is_intermediate]),
             'node_types': len(set(n.node_type for n in self.nodes.values())),
             'node_groups': len(set(g for n in self.nodes.values() for g in n.node_groups)),
-            'avg_connections': sum(len(self._get_downstream_nodes(n)) 
-                                 for n in self.nodes) / len(self.nodes)
+            'avg_connections': sum(len(self._get_downstream_nodes(n.name)) 
+                                 for n in self.nodes.values()) / len(self.nodes)
         }
