@@ -20,6 +20,8 @@ from data.processors import ParameterProcessor
 from optimization.variables import VariableCreator
 from config import Settings
 from utils import NetworkOptimizerLogger, log_execution_time, TimedOperation, SolverProgressLogger
+import argparse
+from pathlib import Path
 from data.readers import create_reader
 
 def read_input_file(file):
@@ -218,9 +220,27 @@ def optimize_network(file: str, settings: Settings = None) -> Dict[str, Any]:
     results = run_solver(input_values, settings)
     return(results)
 
+def main():
+    parser = argparse.ArgumentParser(description='Optimize network')
+    parser.add_argument('input', help='Path to input Excel or json file')
+    parser.add_argument('--output', '-o', help='Path to output excel file')
+    parser.add_argument('--log-level', default='INFO', 
+                       choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                       help='Set the logging level')
+    args = parser.parse_args()
+
+    input_path = Path(args.input)
+    if not input_path.exists():
+        raise FileNotFoundError(f"File not found: {input_path}")
+    output_path = Path(args.output)
+    if not output_path.exists():
+        raise FileNotFoundError(f"File not found: {output_path}")
+    
+    # script_dir = os.path.dirname(__file__) 
+    # input_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_facility_location.json")
+    results = optimize_network(input_path)
+    # output_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_facility_location_results.xlsx")
+    export_results(results, output_path)
+
 if __name__ == "__main__":
-    script_dir = os.path.dirname(__file__) 
-    input_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_facility_location.json")
-    results = optimize_network(input_file_path)
-    output_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_facility_location_results.xlsx")
-    export_results(results,output_file_path)
+    main()
