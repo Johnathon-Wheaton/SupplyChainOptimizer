@@ -8,7 +8,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 import re
 from typing import Dict, Any, List, Set, Tuple
-from data.readers import ExcelReader
 from data.writers import ExcelWriter
 from models.network import Network
 from optimization.constraints import FlowConstraints, AgeConstraints, TransportationConstraints,  ResourceConstraints, CapacityConstraints, CostConstraints
@@ -21,9 +20,10 @@ from data.processors import ParameterProcessor
 from optimization.variables import VariableCreator
 from config import Settings
 from utils import NetworkOptimizerLogger, log_execution_time, TimedOperation, SolverProgressLogger
+from data.readers import create_reader
 
 def read_input_file(file):
-    reader = ExcelReader(file)
+    reader = create_reader(file)
     return reader.read()
 
 def export_results(results, output_file_name):
@@ -71,15 +71,14 @@ def get_solver_results(model, objectives_input, parameters_input, list_of_sets, 
 
 def run_solver(input_values, settings):
     start_time = datetime.now()
-    big_m = settings.network.big_m
     
     # Split all * scenarios
     input_values = DataPreprocessor.split_scenarios(input_values)
     
     # Inputs independent of scenario
     parameters_input = input_values['parameters_input']
-    settings.solver.max_run_time = parameters_input['Max Run Time'][1]
-    settings.solver.gap_limit = parameters_input['Gap Limit'][1]
+    settings.solver.max_run_time = parameters_input['Max Run Time'][0]
+    settings.solver.gap_limit = parameters_input['Gap Limit'][0]
 
     objectives_input = input_values['objectives_input']
     periods_input = input_values['periods_input']
@@ -89,9 +88,7 @@ def run_solver(input_values, settings):
     
     SCENARIOS = objectives_input['Scenario'].unique()
     for s in SCENARIOS:
-        logging.info(f"Starting scenario {s}.")
-        format_inputs_start = datetime.now()
-        
+
         # Filter dataframes for current scenario
         filtered_dataframes = {
             # Include scenario-independent dataframes
@@ -127,7 +124,6 @@ def run_solver(input_values, settings):
             filtered_dataframes[df_name] = filtered_df
 
         # Assign filtered dataframes to variables for easier access
-        scenarios_input = filtered_dataframes['scenarios_input']
         objectives_input = filtered_dataframes['objectives_input']
 
         # Create network model and get sets
@@ -139,7 +135,6 @@ def run_solver(input_values, settings):
         # Create parameters
         parameter_processor = ParameterProcessor()
         list_of_parameters = parameter_processor.create_all_parameters(filtered_dataframes)
-
 
         model = pulp.LpProblem(name="My_Model", sense=pulp.LpMinimize)
 
@@ -167,14 +162,14 @@ def run_solver(input_values, settings):
         result = get_solver_results(model,objectives_input,parameters_input,list_of_sets,list_of_parameters,variables, settings)
         logging.info(f"Solver time: {round((datetime.now() - solve_start).seconds, 0)} seconds.")
 
-        output_results={}
+        output_results = {}
         output_results['variables'] = variables
         output_results['model']=result
         output_results['sets']=list_of_sets
         output_results['dimensions']=dimensions
         
         if s == SCENARIOS[0]:
-            if result !=-1:
+            if result != -1:
                 results = ResultsProcessor.get_results_dictionary(output_results)
                 results = ScenarioProcessor.add_scenario_column_to_results(results, s)
             else:
@@ -225,7 +220,7 @@ def optimize_network(file: str, settings: Settings = None) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(__file__) 
-    input_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_facility_location.xlsx")
+    input_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_facility_location.json")
     results = optimize_network(input_file_path)
     output_file_path = os.path.join(script_dir,"examples/demo_inputs_transportation_facility_location_results.xlsx")
     export_results(results,output_file_path)

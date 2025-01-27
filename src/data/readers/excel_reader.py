@@ -17,6 +17,7 @@ class ExcelReader(BaseReader):
         input_values['parameters_input'] = pd.read_excel(self.file_path, sheet_name='Parameters', header=None, index_col=None).T
         input_values['parameters_input'].columns = input_values['parameters_input'].iloc[0]
         input_values['parameters_input'] = input_values['parameters_input'][1:]
+        input_values['parameters_input'] = input_values['parameters_input'].reset_index(drop=True)
 
         input_values['scenarios_input'] = pd.read_excel(self.file_path, sheet_name='Scenarios')
         input_values['objectives_input'] = pd.read_excel(self.file_path, sheet_name='Objectives')

@@ -11,7 +11,7 @@ class SolverSettings:
     """Solver-specific settings"""
     max_run_time: int = 3600
     gap_limit: float = 0.01
-    solver_name: str = "CBC"
+    solver_name: str = "HiGHS" #TODO: Integrate other solvers
     script_dir = os.path.dirname(os.path.abspath(__file__))
     solver_file_path = os.path.join(script_dir, "../solvers", "highs.exe")
 
@@ -26,9 +26,8 @@ class NetworkSettings:
 @dataclass
 class ResourceSettings:
     """Resource-related settings"""
-    allow_fractional_resources: bool = False
-    enforce_cohort_sizes: bool = True
-    track_resource_attributes: bool = True
+    allow_fractional_resources: bool = False #TODO: Integrate fractional resources
+    enforce_cohort_sizes: bool = True #TODO: Integrate cohor size enforcement option
 
 @dataclass
 class LoggingSettings:
