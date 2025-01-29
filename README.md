@@ -33,7 +33,7 @@ pip install -r requirements.txt
 Here's how to use this project after installation:
 
 ```bash
-python src/main.py "src/examples/demo_inputs_transportation_facility_location.json" -o "src/examples/demo_inputs_transportation_facility_location_results.xlsx"'
+python src/main.py src/examples/demo_inputs_transportation_facility_location.json -o src/examples/demo_inputs_transportation_facility_location_results.xlsx'
 ```
 
 ## 🌟 Examples
@@ -42,8 +42,8 @@ Examples by use-case are coming soon!
 
 ## 📖 Documentation
 
-Full documentation coming soon!
+[Click here](docs/Input_Instructions.md) to read the input file documentation.
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
