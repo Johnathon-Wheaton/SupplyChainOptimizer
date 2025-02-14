@@ -4,14 +4,14 @@ This supply chain optimizer is a mixed integer linear program generalized to han
 
 ## 🚀 Features
 
-- **Mutli-Scenario**
-- **Multi-Objective Goal Programming**
-- **Multi-Stage Objectives**
-- **Multi-Modal**
-- **Multi-Echelon**
-- **Heirarchical capacity and demand**
-- **Soft constraints**
-- **Temporal constraints**
+- **Mutli-Scenario**: Configure and run multiple scenarios for easy side-by-side comparison of strategies
+- **Multi-Objective Goal Programming**: Configure multiple objectives to be solved for concurrently
+- **Multi-Stage Objectives**: Configure multiple objectives to be solved sequentially
+- **Multi-Modal**: Configure different transportation modes and types of resources, each with their own constraints and parameters
+- **Multi-Echelon**: Configure origin, destination, and intermediate nodes to create multiple echelon networks
+- **Heirarchical capacity and demand**: Configure capacity and demand hierarchies to apply constraints to (e.g. solve for volume of small and large packages with constraints on total package count)
+- **Soft constraints**: Allow constraints to be violated with a high penalty to more easily identify sources of infeasibility
+- **Temporal constraints**: Configure and solve for period-over-period costs and constraints (e.g. minimize network changes over time)
 
 ## 🔧 Installation
 
@@ -33,7 +33,7 @@ pip install -r requirements.txt
 Here's how to use this project after installation:
 
 ```bash
-python src/main.py src/examples/demo_inputs_transportation_facility_location.json -o src/examples/demo_inputs_transportation_facility_location_results.xlsx'
+python src/main.py src/examples/demo_inputs_transportation_facility_location.json -o src/examples/demo_inputs_transportation_facility_location_results.xlsx
 ```
 
 ## 🌟 Examples
