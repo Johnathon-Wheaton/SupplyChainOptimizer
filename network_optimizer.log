@@ -36071,3 +36071,1406 @@ Solving for objective 1 of 1
 Objective: Minimize Cost
 Solver time: 295 seconds.
 >>>>>>> 9684b0ed621a1d2e972fa9b73b0b8514dbcb3d06
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Group
+Done splitting data for column Group. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Filling missing values.
+Done generating all combinations. 0 seconds.
+Done merging all combinations. 0 seconds.
+Done filling missing data. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Age
+Done splitting data for column Age. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Location
+Done splitting data for column Location. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Incremental Capacity Label
+Done splitting data for column Incremental Capacity Label. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Downstream Node
+Done splitting data for column Downstream Node. 0 seconds.
+Splitting data for column Downstream Node Group
+Done splitting data for column Downstream Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Solving for objective 1 of 1
+Objective: Minimize Cost
+Solver time: 361 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Group
+Done splitting data for column Group. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Filling missing values.
+Done generating all combinations. 0 seconds.
+Done merging all combinations. 0 seconds.
+Done filling missing data. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Age
+Done splitting data for column Age. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Location
+Done splitting data for column Location. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Incremental Capacity Label
+Done splitting data for column Incremental Capacity Label. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Downstream Node
+Done splitting data for column Downstream Node. 0 seconds.
+Splitting data for column Downstream Node Group
+Done splitting data for column Downstream Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Solving for objective 1 of 1
+Objective: Minimize Cost
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Group
+Done splitting data for column Group. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Filling missing values.
+Done generating all combinations. 0 seconds.
+Done merging all combinations. 0 seconds.
+Done filling missing data. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Age
+Done splitting data for column Age. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Location
+Done splitting data for column Location. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Incremental Capacity Label
+Done splitting data for column Incremental Capacity Label. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Downstream Node
+Done splitting data for column Downstream Node. 0 seconds.
+Splitting data for column Downstream Node Group
+Done splitting data for column Downstream Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Solving for objective 1 of 1
+Objective: Minimize Cost
+Solver time: 1210 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Group
+Done splitting data for column Group. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Filling missing values.
+Done generating all combinations. 0 seconds.
+Done merging all combinations. 0 seconds.
+Done filling missing data. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Age
+Done splitting data for column Age. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Location
+Done splitting data for column Location. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Incremental Capacity Label
+Done splitting data for column Incremental Capacity Label. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Downstream Node
+Done splitting data for column Downstream Node. 0 seconds.
+Splitting data for column Downstream Node Group
+Done splitting data for column Downstream Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Solving for objective 1 of 1
+Objective: Minimize Cost
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Scenario
+Done splitting data for column Scenario. 0 seconds.
+Splitting data for column Group
+Done splitting data for column Group. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Filling missing values.
+Done generating all combinations. 0 seconds.
+Done merging all combinations. 0 seconds.
+Done filling missing data. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Age
+Done splitting data for column Age. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Capacity Type
+Done splitting data for column Capacity Type. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Resource
+Done splitting data for column Resource. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Resource Attribute
+Done splitting data for column Resource Attribute. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Name
+Done splitting data for column Name. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Location
+Done splitting data for column Location. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Incremental Capacity Label
+Done splitting data for column Incremental Capacity Label. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Downstream Node
+Done splitting data for column Downstream Node. 0 seconds.
+Splitting data for column Downstream Node Group
+Done splitting data for column Downstream Node Group. 0 seconds.
+Splitting data for column Product
+Done splitting data for column Product. 0 seconds.
+Splitting data for column Mode
+Done splitting data for column Mode. 0 seconds.
+Splitting data for column Container
+Done splitting data for column Container. 0 seconds.
+Splitting data for column Measure
+Done splitting data for column Measure. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Node
+Done splitting data for column Node. 0 seconds.
+Splitting data for column Node Group
+Done splitting data for column Node Group. 0 seconds.
+Splitting data for column Period
+Done splitting data for column Period. 0 seconds.
+Splitting data for column Product 1
+Done splitting data for column Product 1. 0 seconds.
+Splitting data for column Product 2
+Done splitting data for column Product 2. 0 seconds.
+Splitting data for column Origin
+Done splitting data for column Origin. 0 seconds.
+Splitting data for column Destination
+Done splitting data for column Destination. 0 seconds.
+Splitting data for column Origin Node Group
+Done splitting data for column Origin Node Group. 0 seconds.
+Splitting data for column Destination Node Group
+Done splitting data for column Destination Node Group. 0 seconds.
+Solving for objective 1 of 1
+Objective: Minimize Cost
+Solver time: 247 seconds.

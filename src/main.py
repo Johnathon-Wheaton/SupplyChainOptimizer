@@ -41,10 +41,21 @@ def get_solver_results(model, objectives_input, parameters_input, list_of_sets, 
     objective_handler = ObjectiveHandler(variables, list_of_sets, list_of_parameters)
     
     # Create solver
-    solver = pulp.HiGHS_CMD(path = settings.solver.solver_file_path,
-        timeLimit=settings.solver.max_run_time,
-        gapRel=settings.solver.gap_limit
-    )
+    if settings.solver.solver_name == "HiGHS":
+        solver = pulp.HiGHS_CMD(path = settings.solver.solver_file_path,
+            timeLimit=settings.solver.max_run_time,
+            gapRel=settings.solver.gap_limit
+        )
+    elif settings.solver.solver_name == "SCIP":
+        solver = pulp.SCIP_CMD(path = settings.solver.solver_file_path,
+            timeLimit=settings.solver.max_run_time,
+            gapRel=settings.solver.gap_limit
+        )
+    else:
+        solver = pulp.COIN_CMD(path = settings.solver.solver_file_path,
+            timeLimit=settings.solver.max_run_time,
+            gapRel=settings.solver.gap_limit
+        )
     
     for x in priority_list:
         logging.info(f"Solving for objective {x} of {len(priority_list)}")

@@ -11,9 +11,13 @@ class SolverSettings:
     """Solver-specific settings"""
     max_run_time: int = 3600
     gap_limit: float = 0.01
-    solver_name: str = "HiGHS" #TODO: Integrate other solvers
+    solver_name: str = "HiGHS"
+    # solver_name: str = "CBC"
+    # solver_name: str = "SCIP"
     script_dir = os.path.dirname(os.path.abspath(__file__))
     solver_file_path = os.path.join(script_dir, "../solvers", "highs.exe")
+    # solver_file_path = os.path.join(script_dir, "../solvers/Cbc-master-x86_64-w64-mingw32/bin", "cbc.exe")
+    # solver_file_path = os.path.join(script_dir, "../solvers", "SCIPOptSuite-9.2.1-win64.exe")
 
 @dataclass
 class NetworkSettings:
