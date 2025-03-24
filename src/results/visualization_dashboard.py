@@ -38,6 +38,8 @@ class PulpViz:
         self.results_file = results_file
         self.data = {}
         self.has_lat_lon = False
+        self.has_periods = False
+        self.periods = []
         self.app = dash.Dash(__name__, 
                             external_stylesheets=[dbc.themes.BOOTSTRAP],
                             suppress_callback_exceptions=True)
@@ -68,11 +70,41 @@ class PulpViz:
             raise ValueError(f"Unsupported input file format: {input_ext}")
         
         # Load results data based on file extension
+        sheet_names = ['vol_departed_by_age', 
+            'vol_processed_by_age', 
+            'vol_arrived_by_age', 
+            'ib_vol_carried_over_by_age', 
+            'ob_vol_carried_over_by_age', 
+            'vol_dropped_by_age', 
+            'use_carrying_capacity_option', 
+            'use_transportation_capacit (1)', 
+            'arrived_and_completed_product', 
+            'variable_transportation_costs', 
+            'fixed_transportation_costs', 
+            'variable_operating_costs', 
+            'fixed_operating_costs', 
+            'total_launch_cost', 
+            'total_shut_down_cost', 
+            'resources_assigned', 
+            'resources_added', 
+            'resources_removed', 
+            'resource_capacity', 
+            'resource_attribute_consumption', 
+            'resource_add_cost', 
+            'resource_remove_cost', 
+            'resource_time_cost', 
+            'num_loads_by_group', 
+            'departed_measures', 
+            'demand_by_age', 
+            'age_violation_cost', 
+            'pop_cost', 
+            'volume_moved']
+        
         results_ext = os.path.splitext(results_file)[1].lower()
         if results_ext == '.xlsx' or results_ext == '.xls':
-            self.data['results'] = self._load_excel(results_file)
+            self.data['results'] = self._load_excel(results_file, sheet_names)
         elif results_ext == '.json':
-            self.data['results'] = self._load_json(results_file)
+            self.data['results'] = self._load_json(results_file, sheet_names)
         else:
             raise ValueError(f"Unsupported results file format: {results_ext}")
         
@@ -82,7 +114,7 @@ class PulpViz:
         # Process the data for visualization
         self._process_data()
     
-    def _load_excel(self, file_path):
+    def _load_excel(self, file_path, sheet_names = None):
         """
         Load data from Excel file.
         
@@ -93,10 +125,18 @@ class PulpViz:
             dict: Dictionary with sheet names as keys and pandas DataFrames as values
         """
         # Load all sheets from Excel file
-        excel_data = pd.read_excel(file_path, sheet_name=None)
+        excel_data={}
+        if sheet_names is not None:
+            for sheet in sheet_names:
+                try:
+                    excel_data[sheet] = pd.read_excel(file_path, sheet_name=sheet)
+                except:
+                    print(f"Warning: Sheet '{sheet}' not found in Excel file")
+        else:
+            excel_data = pd.read_excel(file_path, sheet_name=None)
         return excel_data
     
-    def _load_json(self, file_path):
+    def _load_json(self, file_path, sheet_names=None):
         """
         Load data from JSON file.
         
@@ -112,11 +152,25 @@ class PulpViz:
         # Convert JSON data to pandas DataFrames where possible
         processed_data = {}
         if isinstance(json_data, dict):
-            for key, value in json_data.items():
-                if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-                    processed_data[key] = pd.DataFrame(value)
-                else:
-                    processed_data[key] = value
+            if sheet_names is not None:
+                # Process only the specified keys
+                for key in sheet_names:
+                    if key in json_data:
+                        value = json_data[key]
+                        if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+                            processed_data[key] = pd.DataFrame(value)
+                        else:
+                            processed_data[key] = value
+                    else:
+                        print(f"Warning: Key '{key}' not found in JSON data")
+            else:
+                # Process all keys (original behavior)
+                for key, value in json_data.items():
+                    if isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+                        processed_data[key] = pd.DataFrame(value)
+                    else:
+                        processed_data[key] = value
+
         return processed_data
     
     def _check_for_lat_lon(self):
@@ -237,6 +291,23 @@ class PulpViz:
             print(f"DEBUG: Using flow sheet: {flow_sheet}")
             print(f"DEBUG: Flow data shape: {flow_df.shape}")
             print(f"DEBUG: Flow data columns: {flow_df.columns.tolist()}")
+            
+            # Store the original flow data for filtering by period later
+            self.data['flow_data'] = flow_df.copy()
+            
+            # Check if we have PERIODS column for filtering
+            self.has_periods = 'PERIODS' in flow_df.columns
+            if self.has_periods:
+                # Get all unique periods for the filter dropdown
+                self.periods = sorted(flow_df['PERIODS'].unique())
+                print(f"DEBUG: Found periods: {self.periods}")
+            
+            # Check for Scenario column for filtering
+            self.has_scenarios = 'Scenario' in flow_df.columns
+            if self.has_scenarios:
+                # Get all unique scenarios for the filter dropdown
+                self.scenarios = sorted(flow_df['Scenario'].unique())
+                print(f"DEBUG: Found scenarios: {self.scenarios}")
             
             # Check for Scenario column
             has_scenario = 'Scenario' in flow_df.columns
@@ -539,6 +610,7 @@ class PulpViz:
                                 ),
                                 opacity=0.7,
                                 hoverinfo='text',
+                                hovertext=f"{edge['source']} to {edge['target']}: {edge['value']:.0f}",
                                 text=f"{edge['source']} to {edge['target']}: {edge['value']:.0f}",
                                 name=f"{edge['source']} to {edge['target']} - {scenario}",
                                 legendgroup=scenario,
@@ -563,7 +635,7 @@ class PulpViz:
                     color='purple'  # Different color for nodes that are both origin and destination
                     # Note: Removed the 'line' property as it's not supported in Scattermapbox
                 ),
-                text=[f"{node} (Origin & Destination)" for node in both_node_data['name']],
+                text=[f"{node}" for node in both_node_data['name']],
                 hoverinfo='text',
                 name='Origin & Destination Nodes',
                 visible=True  # Always visible regardless of scenario
@@ -582,6 +654,7 @@ class PulpViz:
             ),
             margin=dict(l=0, r=0, t=30, b=0),
             height=700,
+            hovermode='closest',
             legend=dict(
                 yanchor="top",
                 y=0.99,
@@ -631,6 +704,246 @@ class PulpViz:
         
         return fig
     
+    def create_filtered_map_figure(self, filtered_edges):
+        """
+        Create a map visualization with filtered edges.
+        
+        Args:
+            filtered_edges (pd.DataFrame): DataFrame with filtered edge data
+            
+        Returns:
+            plotly.graph_objects.Figure: Map figure
+        """
+        print("DEBUG: Creating filtered map figure")
+        if not self.has_lat_lon or 'node_locations' not in self.data:
+            print("DEBUG: No lat/lon data available")
+            return go.Figure()
+        
+        nodes = self.data['node_locations']
+        edges = filtered_edges
+        
+        print(f"DEBUG: Number of nodes: {len(nodes)}")
+        print(f"DEBUG: Number of filtered edges: {len(edges)}")
+        
+        if len(edges) == 0:
+            # If no edges after filtering, show an empty map with nodes
+            fig = go.Figure()
+            
+            node_trace = go.Scattermapbox(
+                lat=nodes['latitude'],
+                lon=nodes['longitude'],
+                mode='markers',
+                marker=dict(size=10, color='blue'),
+                text=nodes['name'],
+                hoverinfo='text',
+                name='Nodes'
+            )
+            
+            fig.add_trace(node_trace)
+            
+            # Set the map layout
+            fig.update_layout(
+                mapbox=dict(
+                    style="open-street-map",
+                    zoom=4,
+                    center=dict(
+                        lat=nodes['latitude'].mean(),
+                        lon=nodes['longitude'].mean()
+                    )
+                ),
+                margin=dict(l=0, r=0, t=30, b=0),
+                height=700,
+                hovermode='closest',
+                title="Transportation Network Visualization (No flows in selected periods)"
+            )
+            return fig
+        
+        # Create a figure with layers
+        fig = go.Figure()
+        
+        # Get unique scenarios
+        scenarios = edges['Scenario'].unique().tolist()
+        
+        # Define a color palette for origin nodes and their edges
+        origin_nodes = edges['source'].unique()
+        num_origins = len(origin_nodes)
+        
+        # Create a color mapping dictionary for origins
+        if num_origins <= 10:
+            colors = px.colors.qualitative.Plotly
+        else:
+            colors = px.colors.sequential.Viridis
+        
+        # Map each origin to a color
+        origin_color_map = {origin: colors[i % len(colors)] for i, origin in enumerate(origin_nodes)}
+        
+        # Calculate min and max values for edge width scaling
+        min_value = edges['value'].min()
+        max_value = edges['value'].max()
+        
+        # Edge width range
+        min_width = 2
+        max_width = 10
+        
+        # Create a layer for each scenario
+        for scenario in scenarios:
+            scenario_edges = edges[edges['Scenario'] == scenario]
+            
+            # First, add destination nodes with dark blue color
+            dest_nodes = set(scenario_edges['target'].unique())
+            
+            # Filter nodes that are only destinations (not origins)
+            only_dest_nodes = [node for node in dest_nodes if node not in origin_nodes]
+            
+            if only_dest_nodes:
+                dest_node_data = nodes[nodes['name'].isin(only_dest_nodes)]
+                
+                dest_node_trace = go.Scattermapbox(
+                    lat=dest_node_data['latitude'],
+                    lon=dest_node_data['longitude'],
+                    mode='markers',
+                    marker=dict(size=10, color='darkblue'),
+                    text=dest_node_data['name'],
+                    hoverinfo='text',
+                    name=f'Destination Nodes - {scenario}',
+                    legendgroup=scenario,
+                    visible=(scenario == scenarios[0])
+                )
+                fig.add_trace(dest_node_trace)
+            
+            # Add origin nodes with color palette
+            for origin in origin_nodes:
+                if origin in scenario_edges['source'].unique():
+                    origin_node_data = nodes[nodes['name'] == origin]
+                    
+                    if len(origin_node_data) > 0:
+                        origin_color = origin_color_map[origin]
+                        
+                        origin_node_trace = go.Scattermapbox(
+                            lat=origin_node_data['latitude'],
+                            lon=origin_node_data['longitude'],
+                            mode='markers',
+                            marker=dict(size=12, color=origin_color),
+                            text=origin_node_data['name'],
+                            hoverinfo='text',
+                            name=f'Origin: {origin} - {scenario}',
+                            legendgroup=scenario,
+                            visible=(scenario == scenarios[0])
+                        )
+                        fig.add_trace(origin_node_trace)
+                        
+                        # Add edges from this origin
+                        origin_edges = scenario_edges[scenario_edges['source'] == origin]
+                        
+                        for _, edge in origin_edges.iterrows():
+                            source_node = nodes[nodes['name'] == edge['source']]
+                            target_node = nodes[nodes['name'] == edge['target']]
+                            
+                            if len(source_node) == 0 or len(target_node) == 0:
+                                continue
+                                
+                            if edge['source'] == edge['target']:
+                                continue
+                                
+                            width = min_width
+                            if max_value > min_value:
+                                width = min_width + (max_width - min_width) * ((edge['value'] - min_value) / (max_value - min_value))
+                            
+                            edge_trace = go.Scattermapbox(
+                                lat=[source_node.iloc[0]['latitude'], target_node.iloc[0]['latitude']],
+                                lon=[source_node.iloc[0]['longitude'], target_node.iloc[0]['longitude']],
+                                mode='lines',
+                                line=dict(width=width, color=origin_color),
+                                opacity=0.7,
+                                hoverinfo='text',
+                                hovertext=f"{edge['source']} to {edge['target']}: {edge['value']:.0f}",
+                                text=f"{edge['source']} to {edge['target']}: {edge['value']:.0f}",
+                                name=f"{edge['source']} to {edge['target']} - {scenario}",
+                                legendgroup=scenario,
+                                showlegend=False,
+                                visible=(scenario == scenarios[0])
+                            )
+                            fig.add_trace(edge_trace)
+        
+        # Create a node trace for nodes that are both origin and destination
+        both_nodes = [node for node in dest_nodes if node in origin_nodes]
+        
+        if both_nodes:
+            both_node_data = nodes[nodes['name'].isin(both_nodes)]
+            
+            both_node_trace = go.Scattermapbox(
+                lat=both_node_data['latitude'],
+                lon=both_node_data['longitude'],
+                mode='markers',
+                marker=dict(size=14, color='purple'),
+                text=[f"{node}" for node in both_node_data['name']],
+                hoverinfo='text',
+                name='Origin & Destination Nodes',
+                visible=True
+            )
+            fig.add_trace(both_node_trace)
+        
+        # Set the map layout
+        fig.update_layout(
+            mapbox=dict(
+                style="open-street-map",
+                zoom=4,
+                center=dict(
+                    lat=nodes['latitude'].mean(),
+                    lon=nodes['longitude'].mean()
+                )
+            ),
+            margin=dict(l=0, r=0, t=30, b=0),
+            height=700,
+            hovermode='closest',
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01,
+                bgcolor="rgba(255, 255, 255, 0.8)"
+            ),
+            title=f"Transportation Network Visualization (Filtered by Selected Periods)"
+        )
+        
+        # Add buttons to toggle between scenarios
+        if len(scenarios) > 1:
+            buttons = []
+            
+            for i, scenario in enumerate(scenarios):
+                visibility = [True if trace.legendgroup == scenario or trace.name == 'Origin & Destination Nodes' else False 
+                             for trace in fig.data]
+                
+                buttons.append(dict(
+                    label=scenario,
+                    method="update",
+                    args=[{"visible": visibility}]
+                ))
+            
+            # Add a button to show all scenarios
+            all_visible = [True] * len(fig.data)
+            buttons.append(dict(
+                label="All Scenarios",
+                method="update",
+                args=[{"visible": all_visible}]
+            ))
+            
+            # Add the buttons to the layout
+            fig.update_layout(
+                updatemenus=[dict(
+                    type="buttons",
+                    direction="right",
+                    active=0,
+                    buttons=buttons,
+                    x=0.1,
+                    y=1.1,
+                    xanchor="left",
+                    yanchor="top"
+                )]
+            )
+        
+        return fig
+
     def create_network_figure(self):
         """
         Create a network graph visualization.
@@ -695,7 +1008,7 @@ class PulpViz:
             x=edge_x, y=edge_y,
             mode='lines',
             hoverinfo='text',
-            text=edge_text * 3,  # Repeat text for each segment (start, end, None)
+            text=edge_text * 3,  # Repeat text for each segment
             line=dict(width=2, color='red'),
             opacity=0.7,
             name='Edges'
@@ -712,6 +1025,98 @@ class PulpViz:
             height=600,
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+        )
+        
+        return fig
+    
+    def create_filtered_network_figure(self, filtered_edges):
+        """
+        Create a network graph visualization with filtered edges.
+        
+        Args:
+            filtered_edges (pd.DataFrame): DataFrame with filtered edge data
+            
+        Returns:
+            plotly.graph_objects.Figure: Network graph figure
+        """
+        print("DEBUG: Creating filtered network figure")
+        
+        edges = filtered_edges
+        
+        if len(edges) == 0:
+            # Return empty figure if no edges after filtering
+            return go.Figure()
+        
+        # Create a NetworkX graph
+        G = nx.DiGraph()
+        
+        # Add edges with weights
+        for _, edge in edges.iterrows():
+            G.add_edge(edge['source'], edge['target'], weight=edge['value'])
+        
+        # Calculate node positions using a layout algorithm
+        pos = nx.spring_layout(G, seed=42)
+        
+        # Create node trace
+        node_x = []
+        node_y = []
+        node_text = []
+        for node in G.nodes():
+            x, y = pos[node]
+            node_x.append(x)
+            node_y.append(y)
+            node_text.append(f"Node: {node}<br>Connections: {G.degree(node)}")
+        
+        node_trace = go.Scatter(
+            x=node_x, y=node_y,
+            mode='markers',
+            hoverinfo='text',
+            text=node_text,
+            marker=dict(
+                size=10,
+                color='blue',
+                line=dict(width=1, color='black')
+            ),
+            name='Nodes'
+        )
+        
+        # Create edge traces
+        edge_x = []
+        edge_y = []
+        edge_text = []
+        edge_width = []
+        
+        for source, target, data in G.edges(data=True):
+            x0, y0 = pos[source]
+            x1, y1 = pos[target]
+            
+            edge_x.extend([x0, x1, None])
+            edge_y.extend([y0, y1, None])
+            edge_text.append(f"{source} to {target}: {data['weight']:.0f}")
+            edge_width.append(1 + np.log1p(data['weight']) * 0.5)
+        
+        edge_trace = go.Scatter(
+            x=edge_x, y=edge_y,
+            mode='lines',
+            hoverinfo='text',
+            text=edge_text * 3,  # Repeat text for each segment
+            line=dict(width=2, color='red'),
+            opacity=0.7,
+            name='Edges'
+        )
+        
+        # Create the figure
+        fig = go.Figure(data=[edge_trace, node_trace])
+        
+        # Update layout
+        fig.update_layout(
+            showlegend=True,
+            hovermode='closest',
+            margin=dict(l=0, r=0, t=30, b=0),
+            height=600,
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            title=f"Network Graph Visualization (Filtered by Selected Periods)"
         )
         
         return fig
@@ -757,13 +1162,40 @@ class PulpViz:
                 dbc.Col([
                     # Content container that will be updated by callbacks
                     html.Div(id="page-content", className="p-3", children=[
-                        # Initial view - network visualization
+                        # Initial view - network visualization with filters
                         html.Div([
                             html.H3("Network Visualization"),
+                            # Add filters row with period and scenario filters
+                            dbc.Row([
+                                # Period filter
+                                dbc.Col([
+                                    html.Label("Filter by Periods:"),
+                                    dcc.Dropdown(
+                                        id="period-filter",
+                                        options=[{'label': f"Period {p}", 'value': p} for p in self.periods] if hasattr(self, 'periods') else [],
+                                        value=self.periods if hasattr(self, 'periods') else [],
+                                        multi=True,
+                                        placeholder="Select periods to display"
+                                    )
+                                ], width=6, style={'display': 'block' if hasattr(self, 'has_periods') and self.has_periods else 'none'}),
+                                
+                                # Scenario filter
+                                dbc.Col([
+                                    html.Label("Filter by Scenarios:"),
+                                    dcc.Dropdown(
+                                        id="scenario-filter",
+                                        options=[{'label': f"Scenario {s}", 'value': s} for s in self.scenarios] if hasattr(self, 'scenarios') else [],
+                                        value=self.scenarios if hasattr(self, 'scenarios') else [],
+                                        multi=True,
+                                        placeholder="Select scenarios to display"
+                                    )
+                                ], width=6, style={'display': 'block' if hasattr(self, 'has_scenarios') and self.has_scenarios else 'none'}),
+                            ], className="mb-4"),
+                            
                             dcc.Graph(
                                 id='network-graph',
                                 figure=self.create_map_figure() if self.has_lat_lon else self.create_network_figure(),
-                                style={'height': 'calc(100vh - 200px)'}
+                                style={'height': 'calc(100vh - 250px)'}
                             )
                         ], id="network-view")
                     ])
@@ -771,7 +1203,90 @@ class PulpViz:
             ])
         ], fluid=True)
         
-        # Define callbacks to update the page content
+        # Add callback to update the graph based on period filter
+        @self.app.callback(
+            Output("network-graph", "figure"),
+            [Input("period-filter", "value"),
+            Input("scenario-filter", "value")]
+        )
+        def update_graph_by_filters(selected_periods, selected_scenarios):
+            print(f"DEBUG: Updating graph for periods: {selected_periods}, scenarios: {selected_scenarios}")
+            
+            # If no filters selected or no filter data, return the default graph
+            if ((not selected_periods or not self.has_periods) and 
+                (not selected_scenarios or not self.has_scenarios)):
+                return self.create_map_figure() if self.has_lat_lon else self.create_network_figure()
+            
+            # Filter flow data by selected periods and scenarios
+            if 'flow_data' in self.data:
+                flow_df = self.data['flow_data']
+                filtered_flow = flow_df.copy()
+                
+                # Apply period filter if it exists
+                if selected_periods and self.has_periods:
+                    filtered_flow = filtered_flow[filtered_flow['PERIODS'].isin(selected_periods)]
+                
+                # Apply scenario filter if it exists
+                if selected_scenarios and self.has_scenarios:
+                    filtered_flow = filtered_flow[filtered_flow['Scenario'].isin(selected_scenarios)]
+                
+                # If no data after filtering, return empty graph
+                if len(filtered_flow) == 0:
+                    empty_fig = go.Figure()
+                    empty_fig.update_layout(
+                        title="No data available for the selected filters",
+                        height=600
+                    )
+                    return empty_fig
+                
+                # Identify origin and destination columns
+                origin_cols = [col for col in flow_df.columns 
+                            if any(term in col.lower() for term in ['origin', 'departing', 'from'])]
+                
+                dest_cols = [col for col in flow_df.columns 
+                            if any(term in col.lower() for term in ['destination', 'receiving', 'to'])]
+                
+                if origin_cols and dest_cols:
+                    origin_col = origin_cols[0]
+                    dest_col = dest_cols[0]
+                    
+                    # Find value column
+                    value_cols = [col for col in flow_df.columns 
+                                if any(term in col.lower() for term in ['departed_product_by_mode', 'value', 'volume', 'quantity'])]
+                    
+                    value_col = value_cols[0] if value_cols else flow_df.columns[-1]
+                    
+                    # Group by origin, destination, and scenario (if present)
+                    group_cols = [origin_col, dest_col]
+                    if 'Scenario' in flow_df.columns:
+                        group_cols.append('Scenario')
+                    
+                    # Aggregate by summing the values
+                    edges_df = filtered_flow.groupby(group_cols)[value_col].sum().reset_index()
+                    
+                    # Set up column names correctly for visualization functions
+                    if 'Scenario' in edges_df.columns:
+                        edges_df.columns = ['source', 'target', 'Scenario', 'value']
+                    else:
+                        edges_df.columns = ['source', 'target', 'value']
+                        edges_df['Scenario'] = 'Default'  # Add default scenario if missing
+                    
+                    # Filter to keep only edges with positive values
+                    edges_df = edges_df[edges_df['value'] > 0]
+                    
+                    # Store the filtered edges for visualization
+                    self.data['filtered_edges'] = edges_df
+                    
+                    # Create visualization based on filtered data
+                    if self.has_lat_lon:
+                        return self.create_filtered_map_figure(edges_df)
+                    else:
+                        return self.create_filtered_network_figure(edges_df)
+            
+            # Fallback to default visualization
+            return self.create_map_figure() if self.has_lat_lon else self.create_network_figure()
+        
+        # Also update the page content callback to include the scenario filter
         @self.app.callback(
             Output("page-content", "children"),
             [Input("nav-network", "n_clicks")] + 
@@ -787,13 +1302,40 @@ class PulpViz:
             trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
             
             if trigger_id == "nav-network":
-                # Show network visualization
+                # Show network visualization with period and scenario filters
                 return html.Div([
                     html.H3("Network Visualization"),
+                    # Add filters row with period and scenario filters
+                    dbc.Row([
+                        # Period filter
+                        dbc.Col([
+                            html.Label("Filter by Periods:"),
+                            dcc.Dropdown(
+                                id="period-filter",
+                                options=[{'label': f"Period {p}", 'value': p} for p in self.periods] if hasattr(self, 'periods') else [],
+                                value=self.periods if hasattr(self, 'periods') else [],
+                                multi=True,
+                                placeholder="Select periods to display"
+                            )
+                        ], width=6, style={'display': 'block' if hasattr(self, 'has_periods') and self.has_periods else 'none'}),
+                        
+                        # Scenario filter
+                        dbc.Col([
+                            html.Label("Filter by Scenarios:"),
+                            dcc.Dropdown(
+                                id="scenario-filter",
+                                options=[{'label': f"Scenario {s}", 'value': s} for s in self.scenarios] if hasattr(self, 'scenarios') else [],
+                                value=self.scenarios if hasattr(self, 'scenarios') else [],
+                                multi=True,
+                                placeholder="Select scenarios to display"
+                            )
+                        ], width=6, style={'display': 'block' if hasattr(self, 'has_scenarios') and self.has_scenarios else 'none'}),
+                    ], className="mb-4"),
+                    
                     dcc.Graph(
                         id='network-graph',
                         figure=self.create_map_figure() if self.has_lat_lon else self.create_network_figure(),
-                        style={'height': 'calc(100vh - 200px)'}
+                        style={'height': 'calc(100vh - 250px)'}
                     )
                 ], id="network-view")
             
@@ -894,8 +1436,8 @@ class PulpViz:
                 Output(f'grid-{idx}', 'rowData'),
                 [Input(f'apply-agg-{idx}', 'n_clicks')],
                 [State(f'group-by-{idx}', 'value'),
-                State(f'aggregate-{idx}', 'value'),
-                State(f'agg-func-{idx}', 'value')]
+                 State(f'aggregate-{idx}', 'value'),
+                 State(f'agg-func-{idx}', 'value')]
             )
             def update_table_aggregation(n_clicks, group_by, aggregate, agg_func, table_idx=idx):
                 print(f"DEBUG: Aggregation callback triggered for table {table_idx}")
@@ -937,7 +1479,7 @@ class PulpViz:
                         # Rename columns to indicate the aggregation function
                         # Format: column_aggregationFunction
                         grouped.columns = [f"{col[0]}_{col[1]}" if col[1] != '' else col[0] 
-                                        for col in grouped.columns]
+                                         for col in grouped.columns]
                     
                     print(f"DEBUG: Aggregated dataframe shape: {grouped.shape}")
                     print(f"DEBUG: Aggregated columns: {grouped.columns.tolist()}")
