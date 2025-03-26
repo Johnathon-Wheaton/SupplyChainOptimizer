@@ -239,8 +239,8 @@ class FlowConstraints(BaseConstraint):
                                                                 (o_index, d_index, p_index, t_index, m_index, 'unit', u_index, g_index, g2_index), 0
                                                             ) -
                                                             (self.big_m * (1 - self.variables['is_launched'][o_index, t_index])
-                                                             if o_index != '@' and t_index != '@' else 0) -
-                                                            (self.big_m * (1 - self.variables['is_launched'][d_index, t_index])
+                                                             if o_index != '@' and t_index != '@' else 0) - (
+                                                            self.big_m * (1 - self.variables['is_launched'][d_index, t_index])
                                                              if d_index != '@' and t_index != '@' else 0)
                                                         )
                                                         min_flow_right_expr = pulp.lpSum(
@@ -277,6 +277,131 @@ class FlowConstraints(BaseConstraint):
                                                             max_flow_left_expr >= max_flow_right_expr,
                                                             f"flow_constraints_max_units_{t_index}_{o_index}_{d_index}_{m_index}_{u_index}_{p_index}_{g_index}_{g2_index}"
                                                         )
+
+                                                        # Flow percentage constraints
+                                                        # Minimum flow ob percentage constraints
+                                                        if (o_index != '@' or g_index != '@'):
+                                                            min_flow_ob_pct_left_expr = self.parameters['flow_constraints_min_pct_ob'].get(
+                                                                    (o_index, d_index, p_index, t_index, m_index, 'unit', u_index, g_index, g2_index),
+                                                                    0
+                                                                ) * pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in departing_nodes_list
+                                                                for d in self.network_sets['RECEIVING_NODES'] 
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            ) - (self.big_m * (1 - self.variables['is_launched'][o_index, t_index])
+                                                            if o_index != '@' and t_index != '@' else 0) - (
+                                                            self.big_m * (1 - self.variables['is_launched'][d_index, t_index])
+                                                            if d_index != '@' and t_index != '@' else 0)
+
+                                                            min_flow_ob_pct_right_expr = pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in departing_nodes_list
+                                                                for d in receiving_nodes_list
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            )
+                                                            model += (
+                                                                min_flow_ob_pct_left_expr  <= min_flow_ob_pct_right_expr ,
+                                                                f"flow_constraints_min_ob_pct_units_{t_index}_{o_index}_{d_index}_{m_index}_{u_index}_{p_index}_{g_index}_{g2_index}"
+                                                            )
+                                                        # Maximum flow ob percentage constraints
+                                                            max_flow_ob_pct_left_expr = self.parameters['flow_constraints_max_pct_ob'].get(
+                                                                    (o_index, d_index, p_index, t_index, m_index, 'unit', u_index, g_index, g2_index),
+                                                                    self.big_m
+                                                                ) * pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in departing_nodes_list
+                                                                for d in self.network_sets['RECEIVING_NODES'] 
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            )
+                                                            max_flow_ob_pct_right_expr = pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in departing_nodes_list
+                                                                for d in receiving_nodes_list
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            )
+                                                            model += (
+                                                                max_flow_ob_pct_left_expr  >= max_flow_ob_pct_right_expr ,
+                                                                f"flow_constraints_max_ob_pct_units_{t_index}_{o_index}_{d_index}_{m_index}_{u_index}_{p_index}_{g_index}_{g2_index}"
+                                                            )
+                                                        # Minimum flow ib percentage constraints
+                                                        if (d_index != '@' or g2_index != '@'):
+                                                            min_flow_ib_pct_left_expr = self.parameters['flow_constraints_min_pct_ib'].get(
+                                                                    (o_index, d_index, p_index, t_index, m_index, 'unit', u_index, g_index, g2_index),
+                                                                    0
+                                                                ) * pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in self.network_sets['DEPARTING_NODES'] 
+                                                                for d in receiving_nodes_list
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            ) - (self.big_m * (1 - self.variables['is_launched'][o_index, t_index])
+                                                            if o_index != '@' and t_index != '@' else 0) - (
+                                                            self.big_m * (1 - self.variables['is_launched'][d_index, t_index])
+                                                            if d_index != '@' and t_index != '@' else 0)
+
+                                                            min_flow_ib_pct_right_expr = pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in departing_nodes_list
+                                                                for d in receiving_nodes_list
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            )
+                                                            model += (
+                                                                min_flow_ib_pct_left_expr  <= min_flow_ib_pct_right_expr ,
+                                                                f"flow_constraints_min_ib_pct_units_{t_index}_{o_index}_{d_index}_{m_index}_{u_index}_{p_index}_{g_index}_{g2_index}"
+                                                            )
+                                                        # Maximum flow ib percentage constraints
+                                                            max_flow_ib_pct_left_expr = self.parameters['flow_constraints_max_pct_ib'].get(
+                                                                    (o_index, d_index, p_index, t_index, m_index, 'unit', u_index, g_index, g2_index),
+                                                                    self.big_m
+                                                                ) * pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in self.network_sets['DEPARTING_NODES'] 
+                                                                for d in receiving_nodes_list
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            )
+                                                            max_flow_ib_pct_right_expr = pulp.lpSum(
+                                                                self.variables['departed_product_by_mode'][o,d,p,t,m] *
+                                                                self.parameters['products_measures'].get((p,u), 0)
+                                                                for o in departing_nodes_list
+                                                                for d in receiving_nodes_list
+                                                                for t in periods_list
+                                                                for m in modes_list
+                                                                for p in products_list
+                                                                for u in measures_list
+                                                            )
+                                                            model += (
+                                                                max_flow_ib_pct_left_expr  >= max_flow_ib_pct_right_expr ,
+                                                                f"flow_constraints_max_ib_pct_units_{t_index}_{o_index}_{d_index}_{m_index}_{u_index}_{p_index}_{g_index}_{g2_index}"
+                                                            )
+
 
         # Add connection constraints if specified
         if (self.parameters.get('flow_constraints_min_connections') or 
@@ -332,6 +457,7 @@ class FlowConstraints(BaseConstraint):
                                                             for o in departing_nodes_list
                                                             for d in receiving_nodes_list
                                                             for t in periods_list
+                                                            if o != d 
                                                         ) +
                                                         (self.big_m * (1 - self.variables['is_launched'][o_index, t_index])
                                                          if o_index != '@' and t_index != '@' else 0) +

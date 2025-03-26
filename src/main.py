@@ -39,7 +39,7 @@ def get_solver_results(model, objectives_input, parameters_input, list_of_sets, 
     
     # Create objective handler
     objective_handler = ObjectiveHandler(variables, list_of_sets, list_of_parameters)
-    
+
     # Create solver
     if settings.solver.solver_name == "HiGHS":
         solver = pulp.HiGHS_CMD(path = settings.solver.solver_file_path,
