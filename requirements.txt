@@ -1,7 +1,6 @@
 numpy==1.24.3
 pandas==2.0.2
 PuLP==2.9.0
-PyYAML==6.0.1
 PyYAML==6.0.2
 dash==3.0.0
 dash_bootstrap_components==2.0.0
